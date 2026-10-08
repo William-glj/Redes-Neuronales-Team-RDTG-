@@ -69,3 +69,6 @@ print(f"Registros finales limpios: {len(df_clean)}")
 
 # Guardar el DataFrame limpio en un nuevo archivo CSV
 #df_clean.to_csv('IMBD_Movie_Dataset_limpio.csv', index=False)
+
+
+
