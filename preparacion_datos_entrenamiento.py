@@ -43,7 +43,7 @@ optimizador = optim.Adam(model.parameters(), lr=0.01)
 
 
 # ==========================================
-# FUNCIÓN DE EVALUACIÓN (Definida antes de usarla)
+# FUNCIÓN DE EVALUACIÓN 
 # ==========================================
 def evaluar(model, loader, criterio):
     """Devuelve (loss media, accuracy, etiquetas reales, predicciones) sobre un DataLoader."""
