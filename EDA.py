@@ -1,9 +1,6 @@
 import pandas as pd
 import numpy as np
 
-
-
-
 # Cargamos los datos del dataset
 df_original = pd.read_csv('TMBD Movie Dataset.csv')
 
@@ -69,6 +66,5 @@ print(f"Registros finales limpios: {len(df_clean)}")
 
 # Guardar el DataFrame limpio en un nuevo archivo CSV
 #df_clean.to_csv('IMBD_Movie_Dataset_limpio.csv', index=False)
-
 
 

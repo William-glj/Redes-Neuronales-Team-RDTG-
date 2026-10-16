@@ -1,0 +1,112 @@
+---
+title: "Redes Neuronales"
+subtitle: "Tomas | Ramón | Dylan | Guillermo"
+format: html
+editor: visual
+---
+ ---  ⚠️⚠️⚠️ poner otro resumen
+
+En este proyecto analizamos el sector cinematográfico a través del conjunto de datos de TMDB con el objetivo de predecir si una película se convertirá en un éxito de taquilla («taquillazo») mediante un modelo de clasificación basado en redes neuronales con PyTorch. El flujo de trabajo abarca desde un Análisis Exploratorio de Datos (EDA) —donde limpiamos registros, tratamos nulos y analizamos variables clave como presupuesto, géneros o duración— hasta la definición de la arquitectura de deep learning y la experimentación con hiperparámetros (capas ocultas, número de neuronas, learning rate y batch size) para identificar la configuración con mejor rendimiento predictivo.
+
+## 1. PUNTO NUMERO 1: EDA (Análisis Exploratorio de Datos)
+
+**Ciencia de Datos:** Se refiere al *Exploratory Data Analysis* (EDA), un proceso fundamental para resumir las características principales de un dataset, detectar patrones, identificar anomalías y limpiar los datos antes de pasar a la fase de modelado con redes neuronales.
+
+### 1.1. Carga de datos y limpieza inicial
+
+En este paso importamos las librerías necesarias (`pandas` y `numpy`), realizamos la lectura del dataset original y ejecutamos el proceso de depuración de registros duplicados e inconsistentes.
+
+```{python}
+import pandas as pd
+import numpy as np
+
+# 1. Cargamos los datos del dataset
+df_original = pd.read_csv('TMBD Movie Dataset.csv')
+print(f"Dimensiones iniciales: {df_original.shape[0]} filas, {df_original.shape[1]} columnas")
+
+# Creación de una copia de trabajo
+df = df_original.copy()
+
+# 2. Eliminación de duplicados por ID (si existe la columna)
+if 'id' in df.columns:
+    filas_duplicadas = df.duplicated(subset=['id']).sum()
+    if filas_duplicadas > 0:
+        df = df.drop_duplicates(subset=['id'], keep='first')
+        print(f"Se eliminaron {filas_duplicadas} filas duplicadas por ID.")
+    else:
+        print("No se encontraron duplicados.")
+
+# 3. Filtrado de valores incoherentes en presupuesto y recaudación
+if 'budget' in df.columns and 'revenue' in df.columns:
+    budget_revenue = (df['budget'] > 10000) & (df['revenue'] > 10000)
+    df_clean = df[budget_revenue].copy()
+    filas_eliminadas = len(df) - len(df_clean)
+    print(f"Se eliminaron {filas_eliminadas} filas con presupuesto/recaudación <= $10,000.")
+else:
+    df_clean = df.copy()
+
+# 4. Imputación de nulos en duración (runtime)
+if 'runtime' in df_clean.columns and df_clean['runtime'].isnull().sum() > 0:
+    mediana_runtime = df_clean['runtime'].median()
+    df_clean['runtime'] = df_clean['runtime'].fillna(mediana_runtime)
+    print(f"Nulos en 'runtime' imputados con la mediana: {mediana_runtime} min.")
+
+# 5. Formato de fechas e imputación de textos
+if 'release_date' in df_clean.columns:
+    df_clean['release_date'] = pd.to_datetime(df_clean['release_date'], errors='coerce')
+    df_clean = df_clean.dropna(subset=['release_date'])
+
+columnas_texto = [col for col in ['tagline', 'overview', 'homepage', 'genres', 'keywords'] if col in df_clean.columns]
+for col in columnas_texto:
+    df_clean[col] = df_clean[col].fillna('')
+
+if 'budget' in df_clean.columns:
+    df_clean['budget'] = df_clean['budget'].astype(int)
+if 'revenue' in df_clean.columns:
+    df_clean['revenue'] = df_clean['revenue'].astype(int)
+if 'genres' in df_clean.columns:
+    df_clean['genres'] = df_clean['genres'].astype(str).str.strip()
+
+print(f"\nRESUMEN: {len(df_original)} registros iniciales -> {len(df_clean)} registros limpios finales.")
+```
+
+### 1.2. Muestra y Vista Previa del Dataset Limpio
+
+A continuación se muestra una lectura de prueba adaptada automáticamente a los nombres de columna presentes en el archivo:
+
+```{python}
+# Selección dinámica de columnas para evitar errores si alguna variable varía su nombre
+columnas_deseadas = ['id', 'title', 'original_title', 'release_date', 'budget', 'revenue', 'runtime', 'genres']
+columnas_existentes = [col for col in columnas_deseadas if col in df_clean.columns]
+
+if not columnas_existentes:
+    columnas_existentes = list(df_clean.columns[:7])
+
+df_clean[columnas_existentes].head()
+```
+
+#### Ejemplo visual de la tabla generada (Muestra de salida):
+
+| **id** | **title** | **release_date** | **budget** | **revenue** | **runtime** | **genres** |
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| 19995 | Avatar | 2009-12-10 | 237000000 | 2787965087 | 162.0 | Action, Adventure, Fantasy |
+| 299536 | Avengers: Infinity War | 2018-04-25 | 300000000 | 2046239637 | 149.0 | Adventure, Action, Science Fiction |
+| 157336 | Interstellar | 2014-11-05 | 165000000 | 675120017 | 169.0 | Adventure, Drama, Science Fiction |
+| 597 | Titanic | 1997-11-18 | 200000000 | 1845034188 | 194.0 | Drama, Romance |
+
+### 1.3. Resumen Estadístico de las Variables Cuantitativas
+
+```{python}
+# Descripción estadística general de las variables cuantitativas disponibles
+columnas_num = [col for col in ['budget', 'revenue', 'runtime'] if col in df_clean.columns]
+if columnas_num:
+    df_clean[columnas_num].describe().round(2)
+else:
+    df_clean.describe().round(2)
+```
+
+
+
+
+
+//Punto A

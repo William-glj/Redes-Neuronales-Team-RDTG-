@@ -44,7 +44,7 @@ optimizador = optim.Adam(model.parameters(), lr=0.01)
 
 # Bucle de entrenamiento donde actúa el BACKWARD automático
 model.train()
-for epoch in range(10):
+for epoch in range(20):
     for batch_X, batch_y in train_loader:
         
         # 1. Forward (Predicción)
