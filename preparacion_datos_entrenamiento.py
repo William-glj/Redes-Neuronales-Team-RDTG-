@@ -4,8 +4,7 @@ import torch.optim as optim
 import numpy as np
 
 # Importamos los datos ya preparados desde tu fichero 'preparacion_datos_base.py'
-# (Asegúrate de que en 'preparacion_datos_base.py' tengas definidos train_loader y y)
-from preparacion_datos_base import train_loader, y
+from preparacion_datos_base import train_loader, val_loader, y
 
 # ==========================================
 # DEFINICIÓN DE LA CLASE DE LA RED NEURONAL
@@ -29,8 +28,9 @@ class PeliculasNeuralNetwork(nn.Module):
         out = self.output(out)
         return out
 
+
 # ==========================================
-# INICIALIZACIÓN Y ENTRENAMIENTO (CON BACKWARD)
+# INICIALIZACIÓN
 # ==========================================
 input_dim = 5  # Las 5 variables numéricas
 hidden_dim = 64
@@ -42,11 +42,40 @@ criterio = nn.CrossEntropyLoss()
 optimizador = optim.Adam(model.parameters(), lr=0.01)
 
 
-# Bucle de entrenamiento donde actúa el BACKWARD automático
-model.train()
-for epoch in range(20):
+# ==========================================
+# FUNCIÓN DE EVALUACIÓN (Definida antes de usarla)
+# ==========================================
+def evaluar(model, loader, criterio):
+    """Devuelve (loss media, accuracy, etiquetas reales, predicciones) sobre un DataLoader."""
+    model.eval()                      # modo evaluación
+    loss_total, aciertos, total = 0.0, 0, 0
+    todas_reales, todas_pred = [], []
+ 
+    with torch.no_grad():             # no se calculan gradientes
+        for batch_X, batch_y in loader:
+            outputs = model(batch_X)
+            loss = criterio(outputs, batch_y)
+ 
+            predichas = outputs.argmax(dim=1)   # la clase con la puntuación más alta
+ 
+            loss_total += loss.item() * len(batch_y)   
+            aciertos += (predichas == batch_y).sum().item()
+            total += len(batch_y)
+ 
+            todas_reales.extend(batch_y.tolist())
+            todas_pred.extend(predichas.tolist())
+ 
+    return loss_total / total, aciertos / total, todas_reales, todas_pred
+
+
+# ==========================================
+# BUCLE DE ENTRENAMIENTO Y VALIDACIÓN
+# ==========================================
+for epoch in range(10):
+    model.train()
+    loss_acumulada = 0.0
+    
     for batch_X, batch_y in train_loader:
-        
         # 1. Forward (Predicción)
         outputs = model(batch_X)
         
@@ -55,13 +84,15 @@ for epoch in range(20):
         
         # 3. BACKWARD y actualización de pesos
         optimizador.zero_grad()
-        loss.backward()  # <--- Aquí se ejecuta el cálculo hacia atrás
+        loss.backward()  
         optimizador.step()
         
-    print(f"Época {epoch+1} completada. Loss: {loss.item():.4f}"
-          
-          
-          
+        loss_acumulada += loss.item()
+ 
+    loss_train = loss_acumulada / len(train_loader)   # media de la época
 
-
-)
+    # VALIDACIÓN Y PRINT (¡Ahora sí están dentro del bucle de la época!)
+    loss_val, acc_val, _, _ = evaluar(model, val_loader, criterio)
+ 
+    print(f"Época {epoch+1:>2} | Loss train: {loss_train:.4f} | "
+          f"Loss val: {loss_val:.4f} | Accuracy val: {acc_val*100:.2f}%")

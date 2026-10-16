@@ -17,6 +17,7 @@ __pycache__/
 *.deb
 quarto.deb
 *.deb
+.venv/
 venv/
 __pycache__/
 *_files/
