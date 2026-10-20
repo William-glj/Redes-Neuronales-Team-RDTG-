@@ -36,8 +36,6 @@ if df_clean['runtime'].isnull().sum() > 0:
     df_clean['runtime'] = df_clean['runtime'].fillna(mediana_runtime)
     print(f"Nulos en 'runtime' imputados con la mediana: {mediana_runtime} min.")
 
-
-
 # Convertir fechas a objeto datetime
 df_clean['release_date'] = pd.to_datetime(df_clean['release_date'], errors='coerce')
 # En caso de faltar la fecha de estreno se elimina dicha pelicula
