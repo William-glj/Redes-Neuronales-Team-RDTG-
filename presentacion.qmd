@@ -1,8 +1,8 @@
 ---
 title: "Redes Neuronales"
 subtitle: "Tomas | Ramón | Dylan | Guillermo"
-format: html
 editor: visual
+format: html
 ---
  ---  
 
@@ -169,7 +169,7 @@ En nuestro conjunto de datos, esta variable objetivo se representa mediante la e
 
 
 
-### 1. Definición de Variables
+#### 2.1.1. Definición de Variables
 
 Para poder llevar acabo la medición del exito  es necesario diferenciar entre:
 
@@ -188,7 +188,7 @@ label_encoder = LabelEncoder()
 y = label_encoder.fit_transform(df['popularity_level'].astype(str))
 ```
 
-### 2. Justificación del Uso de Redes Neuronales
+#### 2.1.2. Justificación del Uso de Redes Neuronales
 Para este problema, un modelo lineal tradicional (como una Regresión Logística o Regresión Lineal) resultaría insuficiente debido a:
 
 1. **Relaciones No Lineales:** La relación entre variables económicas (presupuesto y recaudación) y el éxito/popularidad de una película no es puramente proporcional. Existen efectos de escala y rendimientos decrecientes.
@@ -226,14 +226,15 @@ title: "Entrenamiento del Modelo Inicial (Baseline)"
 format: html
 ---
 
-## 1. Código
+#### 2.2.1 Código
 
-# Inicialización del modelo, pérdida y optimizador
+**Inicialización del modelo, pérdida y optimizador**
+```
 model = PeliculasNeuralNetwork(input_dim=5, hidden_dim=64, output_dim=4)
 criterio = nn.CrossEntropyLoss()
 optimizador = optim.Adam(model.parameters(), lr=0.01)
-
-# Función para evaluar la red sin calcular gradientes
+```
+**Función para evaluar la red sin calcular gradientes**
 
 ```{python}
 import torch
@@ -284,18 +285,18 @@ def evaluar(model, loader, criterio):
     return loss_total / total, aciertos / total, todas_reales, todas_pred
 ```
 
-## 2. Datos del Entrenamiento
+#### 2.2.2. Datos del Entrenamiento
 
 
 ::: {.callout-note}
-## Resumen de Datos
+**Resumen de Datos**
 * **Registros de Entrenamiento:** 1,021 (repartidos en 32 lotes)
 * **Registros de Validación:** 256 (repartidos en 8 lotes)
 * **Épocas:** 10
 * **Accuracy Final en Validación:** **61.72%**
 :::
 
-### Evolución por Época
+**Evolución por Época**
 
 | Época | Loss Train | Loss Val | Accuracy Val (%) |
 |:-----:|:----------:|:--------:|:----------------:|
@@ -312,7 +313,7 @@ def evaluar(model, loader, criterio):
 
 ---
 
-## 3. Reporte de Clasificación por Clase
+#### 2.2.3. Reporte de Clasificación por Clase
 
 | Clase | Precision | Recall | F1-Score | Support |
 |:---|:---:|:---:|:---:|:---:|
@@ -325,7 +326,7 @@ def evaluar(model, loader, criterio):
 | **Weighted Avg** | 0.63 | 0.62 | 0.61 | 256 |
 
 
-## 4. Gráficos
+#### 2.2.4. Gráficos
 ```{python}
 #| echo: false
 #| label: fig-curvas-entrenamiento
@@ -359,10 +360,10 @@ plt.title('Curva de Entrenamiento y Validación - Modelo Baseline')
 fig.tight_layout()
 plt.show()
 ```
-1. Línea Roja Discontinua (tab:red) — Pérdida de Entrenamiento (Train Loss)
 
-2. Línea Naranja Continua (tab:orange) — Pérdida de Validación (Val Loss)
-3. Línea Azul Continua (tab:blue) — Precisión de Validación (Val Accuracy %)
+1. Línea Roja Discontinua 🟥 — Pérdida de Entrenamiento (Train Loss)
+2. Línea Naranja Continua 🟧 — Pérdida de Validación (Val Loss)
+3. Línea Azul Continua 🟦 — Precisión de Validación (Val Accuracy %)
 
 ```{python}
 #| echo: false
@@ -403,14 +404,111 @@ El objetivo es establecer un punto de partida de rendimiento midiendo la precisi
 Ejecutar código
 
 
-## 2.4. Experimentación Sistemática y Búsqueda en Malla (Grid Search)
+## 3. Fase C: Experimentación Sistemática y Búsqueda en Malla (Grid Search)
 
 Tras evaluar el modelo *Baseline*, implementamos una estrategia de **Grid Search** automatizada para evaluar el impacto de tres hiperparámetros clave en la capacidad de generalización de la red neuronal:
 1. **Profundidad de la red:** Evaluación de 1, 2 y 3 capas ocultas.
 2. **Tamaño del lote (*Batch Size*):** Comparativa entre lotes de 16, 32 y 64 muestras.
 3. **Tasa de aprendizaje (*Learning Rate*):** Variación de magnitud ($10^{-2}$, $10^{-3}$, $10^{-4}$).
 
-### Tabla Comparativa de Experimentos
+### 3.1 Código
+
+**Arquitectura Dinámica del Modelo**
+Este bloque define la red neuronal utilizando nn.Sequential. Permite instanciar modelos con cualquier número de capas ocultas y neuronas pasando simplemente una lista (por ejemplo, [128, 64, 32]).
+
+```{python}
+#| label: pipeline-1-arquitectura
+#| code-fold: false
+
+import torch.nn as nn
+
+class PeliculasNeuralNetwork(nn.Module):
+    def __init__(self, input_dim, hidden_layers, output_dim, activation=nn.ReLU):
+        super().__init__()
+        layers = []
+        in_dim = input_dim
+        
+        # Construcción iterativa de capas ocultas
+        for h_dim in hidden_layers:
+            layers.append(nn.Linear(in_dim, h_dim))
+            layers.append(activation())
+            in_dim = h_dim
+            
+        # Capa final de salida
+        layers.append(nn.Linear(in_dim, output_dim))
+        self.network = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.network(x)
+```
+* **¿Qué hace?** Construye la estructura interna de la red de forma modular según la configuración que le pase el Grid Search.
+* **Clave técnica:** Automatiza la conexión entre la dimensión de entrada, las capas ocultas intermedias y los *logits* de salida.
+
+---
+
+**Gestor Dinámico de Carga de Datos**
+
+Esta función empaqueta las características ($X$) y etiquetas ($y$) en estructuras de datos nativas de PyTorch (`TensorDataset` y `DataLoader`).
+
+
+```{python}
+#| label: pipeline-2-dataloaders
+#| code-fold: false
+
+import torch
+from torch.utils.data import DataLoader, TensorDataset
+
+def crear_dataloaders(X_train, y_train, X_val, y_val, batch_size):
+    # Unificación de tensores
+    train_dataset = TensorDataset(X_train, y_train)
+    val_dataset = TensorDataset(X_val, y_val)
+    
+    # Creación de lotes con shuffling para entrenamiento
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    
+    return train_loader, val_loader
+```
+
+* **¿Qué hace?** Genera los iteradores de lotes (*batches*) adaptados al `batch_size` específico de cada experimento.
+* **Clave técnica:** Aplica `shuffle=True` en el conjunto de entrenamiento para evitar sesgos por orden de datos, manteniendo `shuffle=False` en validación para consistencia en las métricas.
+
+---
+
+**Módulo de Evaluación en Inferencia**
+
+Esta función mide el rendimiento actual de la red sobre el conjunto de datos de validación sin alterar el estado ni los pesos del modelo.
+
+
+```{python}
+#| label: pipeline-3-evaluacion
+#| code-fold: false
+
+import torch
+
+def evaluar(model, loader, criterio):
+    model.eval()  # Desactiva capas de comportamiento específico de train
+    loss_total, aciertos, total = 0.0, 0, 0
+    
+    with torch.no_grad():  # Desactiva el cálculo de gradientes
+        for batch_X, batch_y in loader:
+            outputs = model(batch_X)
+            loss = criterio(outputs, batch_y)
+            predichas = outputs.argmax(dim=1)
+            
+            # Acumulación ponderada por el tamaño real del lote
+            loss_total += loss.item() * len(batch_y)
+            aciertos += (predichas == batch_y).sum().item()
+            total += len(batch_y)
+            
+    return loss_total / total, aciertos / total
+```
+* **¿Qué hace?** Retorna el promedio exacto de la pérdida (`Loss`) y la precisión (`Accuracy`).
+* **Clave técnica:** `torch.no_grad()` bloquea el rastreo de operaciones en el *autograd*, reduciendo drásticamente el consumo de memoria RAM/VRAM y acelerando el cálculo.
+
+
+
+### 3.2 Tabla Comparativa de Experimentos
 
 | ID | Capas Ocultas | Nº Capas | Batch Size | Learning Rate | Train Loss | Val Loss | Val Accuracy (%) | Tiempo (s) |
 |:--:|:-------------:|:--------:|:----------:|:-------------:|:----------:|:--------:|:----------------:|:----------:|
@@ -422,9 +520,68 @@ Tras evaluar el modelo *Baseline*, implementamos una estrategia de **Grid Search
 | **Exp_6** | `[64, 32]` | 2 | 32 | 0.0010 | 0.8607 | 0.9325 | 59.38% | 2.49 |
 | **Exp_7** | `[64, 32]` | 2 | 32 | 0.0001 | 1.2555 | 1.2572 | 47.27% | 2.54 |
 
----
 
-### Análisis e Interpretación de Resultados
+
+```{python}
+#| label: fig-comparativa-grid
+#| fig-cap: "Comparativa de Accuracy y Loss entre los experimentos del Grid Search."
+#| fig-align: "center"
+#| echo: false
+#| warning: false
+#| message: false
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. Datos de la tabla del Grid Search
+data = [
+    {"ID": "Exp_4", "Config": "[64,32] | B:16 | LR:0.01", "Val Acc": 62.89, "Train Loss": 0.7709, "Val Loss": 0.9176},
+    {"ID": "Exp_5", "Config": "[64,32] | B:64 | LR:0.01", "Val Acc": 62.50, "Train Loss": 0.7592, "Val Loss": 0.9114},
+    {"ID": "Exp_1", "Config": "[32] | B:32 | LR:0.01",    "Val Acc": 60.55, "Train Loss": 0.8013, "Val Loss": 0.8962},
+    {"ID": "Exp_3", "Config": "[128,64,32] | B:32 | LR:0.01", "Val Acc": 60.55, "Train Loss": 0.7497, "Val Loss": 0.9442},
+    {"ID": "Exp_2", "Config": "[64,32] | B:32 | LR:0.01", "Val Acc": 60.55, "Train Loss": 0.7610, "Val Loss": 0.9147},
+    {"ID": "Exp_6", "Config": "[64,32] | B:32 | LR:0.001", "Val Acc": 59.38, "Train Loss": 0.8607, "Val Loss": 0.9325},
+    {"ID": "Exp_7", "Config": "[64,32] | B:32 | LR:0.0001", "Val Acc": 47.27, "Train Loss": 1.2555, "Val Loss": 1.2572},
+]
+
+df = pd.DataFrame(data)
+
+# 2. Configurar la figura con 2 subgráficos
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+# Subgráfico 1: Accuracy de Validación por Experimento
+colors = ['#1f77b4' if id != 'Exp_4' else '#2ca02c' for id in df['ID']]  # Resaltar el mejor en verde
+bars = ax1.bar(df['ID'], df['Val Acc'], color=colors, edgecolor='black', alpha=0.85)
+
+ax1.set_title('Accuracy en Validación (%)', fontsize=12, fontweight='bold')
+ax1.set_ylabel('Accuracy (%)')
+ax1.set_ylim(40, 70)
+ax1.grid(axis='y', linestyle='--', alpha=0.6)
+
+# Etiquetas sobre las barras
+for bar in bars:
+    yval = bar.get_height()
+    ax1.text(bar.get_x() + bar.get_width()/2.0, yval + 0.8, f"{yval:.2f}%", ha='center', va='bottom', fontsize=9, fontweight='bold')
+
+# Subgráfico 2: Comparativa Train Loss vs Val Loss
+x = range(len(df))
+width = 0.35
+
+ax2.bar([p - width/2 for p in x], df['Train Loss'], width=width, label='Train Loss', color='#ff7f0e', alpha=0.85)
+ax2.bar([p + width/2 for p in x], df['Val Loss'], width=width, label='Val Loss', color='#d62728', alpha=0.85)
+
+ax2.set_xticks(x)
+ax2.set_xticklabels(df['ID'])
+ax2.set_title('Comparativa de Pérdida (Loss)', fontsize=12, fontweight='bold')
+ax2.set_ylabel('Loss')
+ax2.grid(axis='y', linestyle='--', alpha=0.6)
+ax2.legend()
+
+plt.tight_layout()
+plt.show()
+```
+
+### 3.3 Análisis e Interpretación de Resultados
 
 Al analizar los resultados del Grid Search se extraen las siguientes conclusiones clave:
 
@@ -438,6 +595,8 @@ Al analizar los resultados del Grid Search se extraen las siguientes conclusione
 
 3. **Profundidad de la Arquitectura:**
    * Aumentar la red a 3 capas ocultas (`[128, 64, 32]` en **Exp_3**) logró la menor pérdida en entrenamiento (**0.7497**), pero un *Val Loss* ligeramente superior (**0.9442**). Esto indica que redes más complejas empiezan a mostrar indicios de *overfitting* al memorizar el conjunto de entrenamiento sin mejorar proporcionalmente en validación.
+
+
 
 
 

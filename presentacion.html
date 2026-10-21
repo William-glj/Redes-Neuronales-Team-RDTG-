@@ -129,15 +129,15 @@ window.Quarto = {
 </header>
 
 
-<p>— ⚠️⚠️⚠️ poner otro resumen</p>
-<p>En este proyecto analizamos el sector cinematográfico a través del conjunto de datos de TMDB con el objetivo de predecir si una película se convertirá en un éxito de taquilla («taquillazo») mediante un modelo de clasificación basado en redes neuronales con PyTorch. El flujo de trabajo abarca desde un Análisis Exploratorio de Datos (EDA) —donde limpiamos registros, tratamos nulos y analizamos variables clave como presupuesto, géneros o duración— hasta la definición de la arquitectura de deep learning y la experimentación con hiperparámetros (capas ocultas, número de neuronas, learning rate y batch size) para identificar la configuración con mejor rendimiento predictivo.</p>
+<hr>
+<p>En este proyecto analizamos el sector cinematográfico a través del conjunto de datos de TMDB con el objetivo de predecir el nivel de popularidad de una película (clasificándola en diferentes categorías como baja, media, alta o muy alta) mediante un modelo de clasificación multiclase basado en redes neuronales con PyTorch. El flujo de trabajo abarca desde un Análisis Exploratorio de Datos (EDA) —donde limpiamos registros, tratamos valores nulos y analizamos variables clave como presupuesto, ingresos, géneros o duración— hasta la definición de la arquitectura de deep learning y la experimentación sistemática con hiperparámetros (capas ocultas, tamaño de lote y tasa de aprendizaje) mediante una estrategia de búsqueda en malla (Grid Search) para identificar la configuración con mejor rendimiento predictivo.</p>
 <section id="fase-a-obtención-de-datos-y-análisis-exploratorio-eda" class="level2">
 <h2 class="anchored" data-anchor-id="fase-a-obtención-de-datos-y-análisis-exploratorio-eda">1. Fase A (Obtención de Datos y Análisis Exploratorio (EDA))</h2>
 <p>En este apartado en referencia al <em>Exploratory Data Analysis</em> (EDA), fundamentamos el dataset de los datos complementando patrones, identificando anomalías y limpiando linterferencias de datos.</p>
 <section id="carga-de-datos-y-limpieza-inicial" class="level3">
 <h3 class="anchored" data-anchor-id="carga-de-datos-y-limpieza-inicial">1.1. Carga de datos y limpieza inicial</h3>
 <p>En este paso importamos las librerías necesarias (<code>pandas</code> y <code>numpy</code>), realizamos la lectura del dataset original y ejecutamos el proceso de depuración de registros duplicados e inconsistentes.</p>
-<div id="a0494514" class="cell" data-execution_count="1">
+<div id="01d39ec0" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -201,7 +201,7 @@ RESUMEN: 1287 registros iniciales -&gt; 1277 registros limpios finales.</code></
 <section id="muestra-y-vista-previa-del-dataset-limpio" class="level3">
 <h3 class="anchored" data-anchor-id="muestra-y-vista-previa-del-dataset-limpio">1.2. Muestra y Vista Previa del Dataset Limpio</h3>
 <p>A continuación se muestra una lectura de prueba adaptada automáticamente a los nombres de columna presentes en el archivo:</p>
-<div id="0076b2b9" class="cell" data-execution_count="2">
+<div id="711776bc" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Selección dinámica de columnas para evitar errores si alguna variable varía su nombre</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>columnas_deseadas <span class="op">=</span> [<span class="st">'id'</span>, <span class="st">'title'</span>, <span class="st">'original_title'</span>, <span class="st">'release_date'</span>, <span class="st">'budget'</span>, <span class="st">'revenue'</span>, <span class="st">'runtime'</span>, <span class="st">'genres'</span>]</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>columnas_existentes <span class="op">=</span> [col <span class="cf">for</span> col <span class="kw">in</span> columnas_deseadas <span class="cf">if</span> col <span class="kw">in</span> df_clean.columns]</span>
@@ -210,7 +210,7 @@ RESUMEN: 1287 registros iniciales -&gt; 1277 registros limpios finales.</code></
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    columnas_existentes <span class="op">=</span> <span class="bu">list</span>(df_clean.columns[:<span class="dv">7</span>])</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>df_clean[columnas_existentes].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
+<div class="cell-output cell-output-display" data-execution_count="26">
 <div>
 
 
@@ -350,7 +350,7 @@ RESUMEN: 1287 registros iniciales -&gt; 1277 registros limpios finales.</code></
 </section>
 <section id="resumen-estadístico-de-las-variables-cuantitativas" class="level3">
 <h3 class="anchored" data-anchor-id="resumen-estadístico-de-las-variables-cuantitativas">1.3. Resumen Estadístico de las Variables Cuantitativas</h3>
-<div id="541ed108" class="cell" data-execution_count="3">
+<div id="d0ff6600" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Descripción estadística general de las variables cuantitativas disponibles</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>columnas_num <span class="op">=</span> [col <span class="cf">for</span> col <span class="kw">in</span> [<span class="st">'budget'</span>, <span class="st">'revenue'</span>, <span class="st">'runtime'</span>] <span class="cf">if</span> col <span class="kw">in</span> df_clean.columns]</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> columnas_num:</span>
@@ -364,7 +364,7 @@ RESUMEN: 1287 registros iniciales -&gt; 1277 registros limpios finales.</code></
 <h3 class="anchored" data-anchor-id="resumen-final-del-apartado">1.4. Resumen final del apartado</h3>
 <p>Entonces ¿Qué tenemos?¿Qué estamos viendo y haciendo?</p>
 <p>Hemos partido del fichero inicial del Dataset con el fin de recogerlo como una muestra de datos, en el proceso todas las variables no cualificables que pudieran generar alguna interferencia como los nulos, no enteros, duplicidad e incompatible han sido reformateados para formar parte de un dataset limpio e pulcro. Una muestra ideal para testear un proyecto.</p>
-<div id="815f1e6f" class="cell" data-execution_count="4">
+<div id="d9f66575" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">"Original"</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>df_original <span class="op">=</span> pd.read_csv(<span class="st">'TMBD Movie Dataset.csv'</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -405,23 +405,17 @@ RESUMEN: 1287 registros iniciales -&gt; 1277 registros limpios finales.</code></
 <section id="fase-b-definición-y-entrenamiento-del-modelo" class="level3">
 <h3 class="anchored" data-anchor-id="fase-b-definición-y-entrenamiento-del-modelo">2.1 Fase B: Definición y Entrenamiento del Modelo</h3>
 <p>¿⚠️⚠️⚠️El problema elegido⚠️⚠️⚠️?</p>
-<p>!(img/taquillazo.jpeg)</p>
-<p>A nivel global se producen más de 9.500 películas al año, incliso si se reduce la escala y se capta tan solo un mes aproximadamente se siguen produciendo entre 750-800 películas al mes. Películas en las cuales se invierten recurso entre ellos; tiempo y dinero. Para lograr un objetivo: ser un taquillazo.</p>
-<p>Nuestro objetivo es reconocer o mínimamente predecir que tipo de películas pueden llegar a ser un éxito o al menos acercarse a una probabilidad exacta para conocerla.</p>
-<p>En nuestro modelo del dataset esta categoría se representa mediante la etiqueta de popularity_level. Que se transformara en la variable dummy por excelencia.</p>
-</section>
-</section>
-<section id="planteamiento-del-problema" class="level2">
-<h2 class="anchored" data-anchor-id="planteamiento-del-problema">Planteamiento del Problema</h2>
-<p>El objetivo del proyecto es predecir la categoría de popularidad de una película a partir de sus características principales, formulándolo como un problema de <strong>clasificación multiclase</strong>.</p>
-<section id="definición-de-variables" class="level3">
-<h3 class="anchored" data-anchor-id="definición-de-variables">1. Definición de Variables</h3>
+<p>A nivel global se producen más de 9.500 películas al año. Producir una obra cinematográfica exige una inversión enorme de recursos humanos, creativos y financieros, por lo que comprender qué factores impulsan el impacto de una película en el público es clave para la industria.</p>
+<p>Nuestro propósito de este proyecto es abordar el problema como una clasificación multiclase del nivel de popularidada (High, moderately high, medium, low) partir de sus características principales.</p>
+<p>En nuestro conjunto de datos, esta variable objetivo se representa mediante la etiqueta <code>popularity_level</code>, la cual codificamos numéricamente para alimentar nuestro modelo de clasificación multiclase.</p>
+<section id="definición-de-variables" class="level4">
+<h4 class="anchored" data-anchor-id="definición-de-variables">2.1.1. Definición de Variables</h4>
 <p>Para poder llevar acabo la medición del exito es necesario diferenciar entre:</p>
 <ul>
 <li><strong>Variable Dependiente (<span class="math inline">\(y\)</span>):</strong> Categoría de popularidad de la película (variable categórica multiclase derivada de los datos).</li>
 <li><strong>Variables Explicativas (<span class="math inline">\(X\)</span>):</strong> Conjunto de 5 variables numéricas continuas/discretas (ej. presupuesto, recaudación, duración, valoración media y número de votos).</li>
 </ul>
-<div id="ba3608af" class="cell" data-execution_count="5">
+<div id="eee3173f" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> LabelEncoder</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Seleccionar las variables explicativas (X) y la variable objetivo (Y)</span></span>
@@ -433,8 +427,8 @@ RESUMEN: 1287 registros iniciales -&gt; 1277 registros limpios finales.</code></
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> label_encoder.fit_transform(df[<span class="st">'popularity_level'</span>].astype(<span class="bu">str</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="justificación-del-uso-de-redes-neuronales" class="level3">
-<h3 class="anchored" data-anchor-id="justificación-del-uso-de-redes-neuronales">2. Justificación del Uso de Redes Neuronales</h3>
+<section id="justificación-del-uso-de-redes-neuronales" class="level4">
+<h4 class="anchored" data-anchor-id="justificación-del-uso-de-redes-neuronales">2.1.2. Justificación del Uso de Redes Neuronales</h4>
 <p>Para este problema, un modelo lineal tradicional (como una Regresión Logística o Regresión Lineal) resultaría insuficiente debido a:</p>
 <ol type="1">
 <li><strong>Relaciones No Lineales:</strong> La relación entre variables económicas (presupuesto y recaudación) y el éxito/popularidad de una película no es puramente proporcional. Existen efectos de escala y rendimientos decrecientes.</li>
@@ -454,92 +448,84 @@ RESUMEN: 1287 registros iniciales -&gt; 1277 registros limpios finales.</code></
 <p>Punto: Generar puntuaciones (logits) para decidir a qué categoría pertenece una película.</p>
 <p>[0: Baja, 1: Media, 2: Alta, 3: Muy Alta] Cuando introduces los datos de una película como Avatar (budget alto, vote_count elevado, etc.), la última capa de la red produce 4 puntuaciones o logits:<span class="math display">\[\text{Logits} = [-2.5, \,-0.8, \, 1.2, \, 4.5]\]</span>Interpretación: La red asigna el valor más alto (<span class="math inline">\(4.5\)</span>) a la posición 3 (Muy Alta</p>
 </section>
+</section>
 <section id="fase-b-modulo-inicial" class="level3">
 <h3 class="anchored" data-anchor-id="fase-b-modulo-inicial">2.2 Fase B: Modulo inicial</h3>
 <hr>
 <p>title: “Entrenamiento del Modelo Inicial (Baseline)” format: html</p>
 <hr>
-</section>
-</section>
-<section id="código" class="level2">
-<h2 class="anchored" data-anchor-id="código">1. Código</h2>
-</section>
-<section id="inicialización-del-modelo-pérdida-y-optimizador" class="level1">
-<h1>Inicialización del modelo, pérdida y optimizador</h1>
-<p>model = PeliculasNeuralNetwork(input_dim=5, hidden_dim=64, output_dim=4) criterio = nn.CrossEntropyLoss() optimizador = optim.Adam(model.parameters(), lr=0.01)</p>
-</section>
-<section id="función-para-evaluar-la-red-sin-calcular-gradientes" class="level1">
-<h1>Función para evaluar la red sin calcular gradientes</h1>
-<div id="893580ac" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Definición de la clase de la Red Neuronal</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PeliculasNeuralNetwork(nn.Module):</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_dim, hidden_dim, output_dim):</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(PeliculasNeuralNetwork, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer1 <span class="op">=</span> nn.Linear(input_dim, hidden_dim)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.relu <span class="op">=</span> nn.ReLU()</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer2 <span class="op">=</span> nn.Linear(hidden_dim, hidden_dim)</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output <span class="op">=</span> nn.Linear(hidden_dim, output_dim)</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.layer1(x)</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.relu(out)</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.layer2(out)</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.relu(out)</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.output(out)</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Inicialización del modelo, pérdida y optimizador</span></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> PeliculasNeuralNetwork(input_dim<span class="op">=</span><span class="dv">5</span>, hidden_dim<span class="op">=</span><span class="dv">64</span>, output_dim<span class="op">=</span><span class="dv">4</span>)</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>criterio <span class="op">=</span> nn.CrossEntropyLoss()</span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>optimizador <span class="op">=</span> optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>)</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Función para evaluar la red sin calcular gradientes</span></span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluar(model, loader, criterio):</span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    loss_total, aciertos, total <span class="op">=</span> <span class="fl">0.0</span>, <span class="dv">0</span>, <span class="dv">0</span></span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    todas_reales, todas_pred <span class="op">=</span> [], []</span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
-<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> batch_X, batch_y <span class="kw">in</span> loader:</span>
-<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>            outputs <span class="op">=</span> model(batch_X)</span>
-<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> criterio(outputs, batch_y)</span>
-<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>            predichas <span class="op">=</span> outputs.argmax(dim<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>            loss_total <span class="op">+=</span> loss.item() <span class="op">*</span> <span class="bu">len</span>(batch_y)   </span>
-<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>            aciertos <span class="op">+=</span> (predichas <span class="op">==</span> batch_y).<span class="bu">sum</span>().item()</span>
-<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="bu">len</span>(batch_y)</span>
-<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>            todas_reales.extend(batch_y.tolist())</span>
-<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>            todas_pred.extend(predichas.tolist())</span>
-<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> loss_total <span class="op">/</span> total, aciertos <span class="op">/</span> total, todas_reales, todas_pred</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="código" class="level4">
+<h4 class="anchored" data-anchor-id="código">2.2.1 Código</h4>
+<p><strong>Inicialización del modelo, pérdida y optimizador</strong></p>
+<pre><code>model = PeliculasNeuralNetwork(input_dim=5, hidden_dim=64, output_dim=4)
+criterio = nn.CrossEntropyLoss()
+optimizador = optim.Adam(model.parameters(), lr=0.01)</code></pre>
+<p><strong>Función para evaluar la red sin calcular gradientes</strong></p>
+<div id="0481e5cc" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Definición de la clase de la Red Neuronal</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PeliculasNeuralNetwork(nn.Module):</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_dim, hidden_dim, output_dim):</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(PeliculasNeuralNetwork, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer1 <span class="op">=</span> nn.Linear(input_dim, hidden_dim)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.relu <span class="op">=</span> nn.ReLU()</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer2 <span class="op">=</span> nn.Linear(hidden_dim, hidden_dim)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output <span class="op">=</span> nn.Linear(hidden_dim, output_dim)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.layer1(x)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.relu(out)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.layer2(out)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.relu(out)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.output(out)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Inicialización del modelo, pérdida y optimizador</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> PeliculasNeuralNetwork(input_dim<span class="op">=</span><span class="dv">5</span>, hidden_dim<span class="op">=</span><span class="dv">64</span>, output_dim<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>criterio <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>optimizador <span class="op">=</span> optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>)</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Función para evaluar la red sin calcular gradientes</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluar(model, loader, criterio):</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    loss_total, aciertos, total <span class="op">=</span> <span class="fl">0.0</span>, <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    todas_reales, todas_pred <span class="op">=</span> [], []</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> batch_X, batch_y <span class="kw">in</span> loader:</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>            outputs <span class="op">=</span> model(batch_X)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> criterio(outputs, batch_y)</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>            predichas <span class="op">=</span> outputs.argmax(dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>            loss_total <span class="op">+=</span> loss.item() <span class="op">*</span> <span class="bu">len</span>(batch_y)   </span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>            aciertos <span class="op">+=</span> (predichas <span class="op">==</span> batch_y).<span class="bu">sum</span>().item()</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="bu">len</span>(batch_y)</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>            todas_reales.extend(batch_y.tolist())</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>            todas_pred.extend(predichas.tolist())</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> loss_total <span class="op">/</span> total, aciertos <span class="op">/</span> total, todas_reales, todas_pred</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="datos-del-entrenamiento" class="level2">
-<h2 class="anchored" data-anchor-id="datos-del-entrenamiento">2. Datos del Entrenamiento</h2>
+</section>
+<section id="datos-del-entrenamiento" class="level4">
+<h4 class="anchored" data-anchor-id="datos-del-entrenamiento">2.2.2. Datos del Entrenamiento</h4>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Resumen de Datos
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<ul>
-<li><strong>Registros de Entrenamiento:</strong> 1,021 (repartidos en 32 lotes)</li>
-<li><strong>Registros de Validación:</strong> 256 (repartidos en 8 lotes)</li>
-<li><strong>Épocas:</strong> 10</li>
-<li><strong>Accuracy Final en Validación:</strong> <strong>61.72%</strong></li>
-</ul>
+<p><strong>Resumen de Datos</strong> * <strong>Registros de Entrenamiento:</strong> 1,021 (repartidos en 32 lotes) * <strong>Registros de Validación:</strong> 256 (repartidos en 8 lotes) * <strong>Épocas:</strong> 10 * <strong>Accuracy Final en Validación:</strong> <strong>61.72%</strong></p>
 </div>
 </div>
-<section id="evolución-por-época" class="level3">
-<h3 class="anchored" data-anchor-id="evolución-por-época">Evolución por Época</h3>
+<p><strong>Evolución por Época</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -614,9 +600,8 @@ Resumen de Datos
 </table>
 <hr>
 </section>
-</section>
-<section id="reporte-de-clasificación-por-clase" class="level2">
-<h2 class="anchored" data-anchor-id="reporte-de-clasificación-por-clase">3. Reporte de Clasificación por Clase</h2>
+<section id="reporte-de-clasificación-por-clase" class="level4">
+<h4 class="anchored" data-anchor-id="reporte-de-clasificación-por-clase">2.2.3. Reporte de Clasificación por Clase</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -680,35 +665,9 @@ Resumen de Datos
 </tbody>
 </table>
 </section>
-<section id="gráficos" class="level2">
-<h2 class="anchored" data-anchor-id="gráficos">4. Gráficos</h2>
+<section id="gráficos" class="level4">
+<h4 class="anchored" data-anchor-id="gráficos">2.2.4. Gráficos</h4>
 <div id="cell-fig-curvas-entrenamiento" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>epocas <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">11</span>))</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>loss_train <span class="op">=</span> [<span class="fl">1.1011</span>, <span class="fl">0.9705</span>, <span class="fl">0.9130</span>, <span class="fl">0.8749</span>, <span class="fl">0.8556</span>, <span class="fl">0.8282</span>, <span class="fl">0.8103</span>, <span class="fl">0.8023</span>, <span class="fl">0.8006</span>, <span class="fl">0.7960</span>]</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>loss_val   <span class="op">=</span> [<span class="fl">1.0038</span>, <span class="fl">1.0285</span>, <span class="fl">0.9087</span>, <span class="fl">0.9399</span>, <span class="fl">0.9193</span>, <span class="fl">0.9249</span>, <span class="fl">0.8887</span>, <span class="fl">0.9068</span>, <span class="fl">0.8797</span>, <span class="fl">0.9125</span>]</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>acc_val    <span class="op">=</span> [<span class="fl">52.73</span>,  <span class="fl">53.52</span>,  <span class="fl">62.11</span>,  <span class="fl">58.59</span>,  <span class="fl">59.77</span>,  <span class="fl">60.55</span>,  <span class="fl">61.72</span>,  <span class="fl">64.06</span>,  <span class="fl">62.50</span>,  <span class="fl">61.72</span>]</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>fig, ax1 <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">4.5</span>))</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Eje de Loss</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>ax1.set_xlabel(<span class="st">'Época'</span>)</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>ax1.set_ylabel(<span class="st">'Loss'</span>, color<span class="op">=</span><span class="st">'tab:red'</span>)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>ax1.plot(epocas, loss_train, color<span class="op">=</span><span class="st">'tab:red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Train Loss'</span>)</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>ax1.plot(epocas, loss_val, color<span class="op">=</span><span class="st">'tab:orange'</span>, label<span class="op">=</span><span class="st">'Val Loss'</span>)</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>ax1.tick_params(axis<span class="op">=</span><span class="st">'y'</span>, labelcolor<span class="op">=</span><span class="st">'tab:red'</span>)</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>ax1.grid(<span class="va">True</span>, linestyle<span class="op">=</span><span class="st">':'</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Segundo eje para Accuracy</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>ax2 <span class="op">=</span> ax1.twinx()</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">'Accuracy Val (%)'</span>, color<span class="op">=</span><span class="st">'tab:blue'</span>)</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>ax2.plot(epocas, acc_val, color<span class="op">=</span><span class="st">'tab:blue'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">'Val Accuracy'</span>)</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>ax2.tick_params(axis<span class="op">=</span><span class="st">'y'</span>, labelcolor<span class="op">=</span><span class="st">'tab:blue'</span>)</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Curva de Entrenamiento y Validación - Modelo Baseline'</span>)</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="fig-curvas-entrenamiento" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
@@ -723,33 +682,11 @@ Figure&nbsp;1: Evolución de la pérdida (Loss) y precisión (Accuracy) durante 
 </div>
 </div>
 <ol type="1">
-<li><p>Línea Roja Discontinua (tab:red) — Pérdida de Entrenamiento (Train Loss)</p></li>
-<li><p>Línea Naranja Continua (tab:orange) — Pérdida de Validación (Val Loss)</p></li>
-<li><p>Línea Azul Continua (tab:blue) — Precisión de Validación (Val Accuracy %)</p></li>
+<li>Línea Roja Discontinua 🟥 — Pérdida de Entrenamiento (Train Loss)</li>
+<li>Línea Naranja Continua 🟧 — Pérdida de Validación (Val Loss)</li>
+<li>Línea Azul Continua 🟦 — Precisión de Validación (Val Accuracy %)</li>
 </ol>
 <div id="cell-fig-metricas-clase" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Clase'</span>: [<span class="st">'High'</span>, <span class="st">'Low'</span>, <span class="st">'Medium'</span>, <span class="st">'Moderately High'</span>],</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Precision'</span>: [<span class="fl">0.80</span>, <span class="fl">0.62</span>, <span class="fl">0.59</span>, <span class="fl">0.51</span>],</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Recall'</span>: [<span class="fl">0.76</span>, <span class="fl">0.67</span>, <span class="fl">0.33</span>, <span class="fl">0.71</span>],</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'F1-Score'</span>: [<span class="fl">0.78</span>, <span class="fl">0.64</span>, <span class="fl">0.43</span>, <span class="fl">0.59</span>]</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>df_metrics <span class="op">=</span> pd.DataFrame(data).melt(id_vars<span class="op">=</span><span class="st">'Clase'</span>, var_name<span class="op">=</span><span class="st">'Métrica'</span>, value_name<span class="op">=</span><span class="st">'Valor'</span>)</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>sns.barplot(data<span class="op">=</span>df_metrics, x<span class="op">=</span><span class="st">'Clase'</span>, y<span class="op">=</span><span class="st">'Valor'</span>, hue<span class="op">=</span><span class="st">'Métrica'</span>, palette<span class="op">=</span><span class="st">'viridis'</span>)</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Desempeño del Modelo por Nivel de Popularidad'</span>)</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>plt.ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Puntuación (0 - 1)'</span>)</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>plt.grid(axis<span class="op">=</span><span class="st">'y'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'lower right'</span>)</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="fig-metricas-clase" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
@@ -763,11 +700,237 @@ Figure&nbsp;2: Métricas de Precisión, Recall y F1-Score por nivel de popularid
 </div>
 </div>
 </div>
+</section>
+</section>
 <section id="fase-b-resumen-final-del-apartado" class="level3">
 <h3 class="anchored" data-anchor-id="fase-b-resumen-final-del-apartado">2.3 Fase B: Resumen final del apartado</h3>
 <p>¿Qué estamos viendo y haciendo? Hemos partido del conjunto de datos ya filtrado y pulcro de la fase previa. Una vez resueltos los problemas de nulos, formatos e incompatibilidades de tipos, tomamos esos datos empaquetados en lotes (train_loader y val_loader) para construir, entrenar y evaluar nuestro modelo baseline en PyTorch.</p>
 <p>El objetivo es establecer un punto de partida de rendimiento midiendo la precisión (accuracy) y la pérdida (loss) al intentar predecir la categoría de popularidad de una película a partir de sus 5 características cuantitativas. Ejecutar código</p>
 </section>
+</section>
+<section id="fase-c-experimentación-sistemática-y-búsqueda-en-malla-grid-search" class="level2">
+<h2 class="anchored" data-anchor-id="fase-c-experimentación-sistemática-y-búsqueda-en-malla-grid-search">3. Fase C: Experimentación Sistemática y Búsqueda en Malla (Grid Search)</h2>
+<p>Tras evaluar el modelo <em>Baseline</em>, implementamos una estrategia de <strong>Grid Search</strong> automatizada para evaluar el impacto de tres hiperparámetros clave en la capacidad de generalización de la red neuronal: 1. <strong>Profundidad de la red:</strong> Evaluación de 1, 2 y 3 capas ocultas. 2. <strong>Tamaño del lote (<em>Batch Size</em>):</strong> Comparativa entre lotes de 16, 32 y 64 muestras. 3. <strong>Tasa de aprendizaje (<em>Learning Rate</em>):</strong> Variación de magnitud (<span class="math inline">\(10^{-2}\)</span>, <span class="math inline">\(10^{-3}\)</span>, <span class="math inline">\(10^{-4}\)</span>).</p>
+<section id="código-1" class="level3">
+<h3 class="anchored" data-anchor-id="código-1">3.1 Código</h3>
+<p><strong>Arquitectura Dinámica del Modelo</strong> Este bloque define la red neuronal utilizando nn.Sequential. Permite instanciar modelos con cualquier número de capas ocultas y neuronas pasando simplemente una lista (por ejemplo, [128, 64, 32]).</p>
+<div id="pipeline-1-arquitectura" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PeliculasNeuralNetwork(nn.Module):</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_dim, hidden_layers, output_dim, activation<span class="op">=</span>nn.ReLU):</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        layers <span class="op">=</span> []</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        in_dim <span class="op">=</span> input_dim</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Construcción iterativa de capas ocultas</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> h_dim <span class="kw">in</span> hidden_layers:</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>            layers.append(nn.Linear(in_dim, h_dim))</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>            layers.append(activation())</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>            in_dim <span class="op">=</span> h_dim</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Capa final de salida</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        layers.append(nn.Linear(in_dim, output_dim))</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.network <span class="op">=</span> nn.Sequential(<span class="op">*</span>layers)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.network(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li><strong>¿Qué hace?</strong> Construye la estructura interna de la red de forma modular según la configuración que le pase el Grid Search.</li>
+<li><strong>Clave técnica:</strong> Automatiza la conexión entre la dimensión de entrada, las capas ocultas intermedias y los <em>logits</em> de salida.</li>
+</ul>
+<hr>
+<p><strong>Gestor Dinámico de Carga de Datos</strong></p>
+<p>Esta función empaqueta las características (<span class="math inline">\(X\)</span>) y etiquetas (<span class="math inline">\(y\)</span>) en estructuras de datos nativas de PyTorch (<code>TensorDataset</code> y <code>DataLoader</code>).</p>
+<div id="pipeline-2-dataloaders" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader, TensorDataset</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> crear_dataloaders(X_train, y_train, X_val, y_val, batch_size):</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Unificación de tensores</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    train_dataset <span class="op">=</span> TensorDataset(X_train, y_train)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    val_dataset <span class="op">=</span> TensorDataset(X_val, y_val)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Creación de lotes con shuffling para entrenamiento</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    train_loader <span class="op">=</span> DataLoader(train_dataset, batch_size<span class="op">=</span>batch_size, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    val_loader <span class="op">=</span> DataLoader(val_dataset, batch_size<span class="op">=</span>batch_size, shuffle<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> train_loader, val_loader</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li><strong>¿Qué hace?</strong> Genera los iteradores de lotes (<em>batches</em>) adaptados al <code>batch_size</code> específico de cada experimento.</li>
+<li><strong>Clave técnica:</strong> Aplica <code>shuffle=True</code> en el conjunto de entrenamiento para evitar sesgos por orden de datos, manteniendo <code>shuffle=False</code> en validación para consistencia en las métricas.</li>
+</ul>
+<hr>
+<p><strong>Módulo de Evaluación en Inferencia</strong></p>
+<p>Esta función mide el rendimiento actual de la red sobre el conjunto de datos de validación sin alterar el estado ni los pesos del modelo.</p>
+<div id="pipeline-3-evaluacion" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluar(model, loader, criterio):</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()  <span class="co"># Desactiva capas de comportamiento específico de train</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    loss_total, aciertos, total <span class="op">=</span> <span class="fl">0.0</span>, <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():  <span class="co"># Desactiva el cálculo de gradientes</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> batch_X, batch_y <span class="kw">in</span> loader:</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>            outputs <span class="op">=</span> model(batch_X)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> criterio(outputs, batch_y)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>            predichas <span class="op">=</span> outputs.argmax(dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Acumulación ponderada por el tamaño real del lote</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>            loss_total <span class="op">+=</span> loss.item() <span class="op">*</span> <span class="bu">len</span>(batch_y)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>            aciertos <span class="op">+=</span> (predichas <span class="op">==</span> batch_y).<span class="bu">sum</span>().item()</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="bu">len</span>(batch_y)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> loss_total <span class="op">/</span> total, aciertos <span class="op">/</span> total</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li><strong>¿Qué hace?</strong> Retorna el promedio exacto de la pérdida (<code>Loss</code>) y la precisión (<code>Accuracy</code>).</li>
+<li><strong>Clave técnica:</strong> <code>torch.no_grad()</code> bloquea el rastreo de operaciones en el <em>autograd</em>, reduciendo drásticamente el consumo de memoria RAM/VRAM y acelerando el cálculo.</li>
+</ul>
+</section>
+<section id="tabla-comparativa-de-experimentos" class="level3">
+<h3 class="anchored" data-anchor-id="tabla-comparativa-de-experimentos">3.2 Tabla Comparativa de Experimentos</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 3%">
+<col style="width: 13%">
+<col style="width: 9%">
+<col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 11%">
+<col style="width: 9%">
+<col style="width: 16%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">ID</th>
+<th style="text-align: center;">Capas Ocultas</th>
+<th style="text-align: center;">Nº Capas</th>
+<th style="text-align: center;">Batch Size</th>
+<th style="text-align: center;">Learning Rate</th>
+<th style="text-align: center;">Train Loss</th>
+<th style="text-align: center;">Val Loss</th>
+<th style="text-align: center;">Val Accuracy (%)</th>
+<th style="text-align: center;">Tiempo (s)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>Exp_4</strong></td>
+<td style="text-align: center;"><code>[64, 32]</code></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">16</td>
+<td style="text-align: center;">0.0100</td>
+<td style="text-align: center;">0.7709</td>
+<td style="text-align: center;"><strong>0.9176</strong></td>
+<td style="text-align: center;"><strong>62.89%</strong></td>
+<td style="text-align: center;">4.40</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>Exp_5</strong></td>
+<td style="text-align: center;"><code>[64, 32]</code></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">64</td>
+<td style="text-align: center;">0.0100</td>
+<td style="text-align: center;">0.7592</td>
+<td style="text-align: center;"><strong>0.9114</strong></td>
+<td style="text-align: center;"><strong>62.50%</strong></td>
+<td style="text-align: center;">1.57</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>Exp_1</strong></td>
+<td style="text-align: center;"><code>[32]</code></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">32</td>
+<td style="text-align: center;">0.0100</td>
+<td style="text-align: center;">0.8013</td>
+<td style="text-align: center;">0.8962</td>
+<td style="text-align: center;">60.55%</td>
+<td style="text-align: center;">2.06</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>Exp_3</strong></td>
+<td style="text-align: center;"><code>[128, 64, 32]</code></td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">32</td>
+<td style="text-align: center;">0.0100</td>
+<td style="text-align: center;">0.7497</td>
+<td style="text-align: center;">0.9442</td>
+<td style="text-align: center;">60.55%</td>
+<td style="text-align: center;">3.24</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>Exp_2</strong></td>
+<td style="text-align: center;"><code>[64, 32]</code></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">32</td>
+<td style="text-align: center;">0.0100</td>
+<td style="text-align: center;">0.7610</td>
+<td style="text-align: center;">0.9147</td>
+<td style="text-align: center;">60.55%</td>
+<td style="text-align: center;">2.55</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>Exp_6</strong></td>
+<td style="text-align: center;"><code>[64, 32]</code></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">32</td>
+<td style="text-align: center;">0.0010</td>
+<td style="text-align: center;">0.8607</td>
+<td style="text-align: center;">0.9325</td>
+<td style="text-align: center;">59.38%</td>
+<td style="text-align: center;">2.49</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>Exp_7</strong></td>
+<td style="text-align: center;"><code>[64, 32]</code></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">32</td>
+<td style="text-align: center;">0.0001</td>
+<td style="text-align: center;">1.2555</td>
+<td style="text-align: center;">1.2572</td>
+<td style="text-align: center;">47.27%</td>
+<td style="text-align: center;">2.54</td>
+</tr>
+</tbody>
+</table>
+<div id="cell-fig-comparativa-grid" class="cell" data-message="false" data-execution_count="12">
+<div class="cell-output cell-output-display">
+<div id="fig-comparativa-grid" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-comparativa-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="presentacion_files/figure-html/fig-comparativa-grid-output-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-comparativa-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Comparativa de Accuracy y Loss entre los experimentos del Grid Search.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="análisis-e-interpretación-de-resultados" class="level3">
+<h3 class="anchored" data-anchor-id="análisis-e-interpretación-de-resultados">3.3 Análisis e Interpretación de Resultados</h3>
+<p>Al analizar los resultados del Grid Search se extraen las siguientes conclusiones clave:</p>
+<ol type="1">
+<li><strong>Impacto del Tamaño del Lote (<em>Batch Size</em>):</strong>
+<ul>
+<li>Reducir el <em>batch size</em> a <strong>16</strong> (<strong>Exp_4</strong>) ofreció la mayor precisión del experimento (<strong>62.89%</strong>). Esto se debe a que lotes más pequeños introducen más estocasticidad (ruido instructivo) en el cálculo de los gradientes, lo que ayuda al optimizador Adam a escapar de mínimos locales.</li>
+<li>Aumentar el lote a <strong>64</strong> (<strong>Exp_5</strong>) mantuvo un rendimiento elevado (<strong>62.50%</strong>) reduciendo sensiblemente el tiempo de cómputo (1.57 s frente a 4.40 s), siendo la opción más computationally efficient.</li>
+</ul></li>
+<li><strong>Efecto de la Tasa de Aprendizaje (<em>Learning Rate</em>):</strong>
+<ul>
+<li>Un <em>learning rate</em> de <strong>0.01</strong> resultó ser óptimo para la velocidad de convergencia en 15 épocas.</li>
+<li>Reducir el <em>learning rate</em> a <strong>0.0001</strong> (<strong>Exp_7</strong>) penalizó drásticamente el rendimiento (<strong>47.27%</strong>). En solo 15 épocas, los pasos de actualización de los pesos son demasiado pequeños, dejando la red lejos de la convergencia.</li>
+</ul></li>
+<li><strong>Profundidad de la Arquitectura:</strong>
+<ul>
+<li>Aumentar la red a 3 capas ocultas (<code>[128, 64, 32]</code> en <strong>Exp_3</strong>) logró la menor pérdida en entrenamiento (<strong>0.7497</strong>), pero un <em>Val Loss</em> ligeramente superior (<strong>0.9442</strong>). Esto indica que redes más complejas empiezan a mostrar indicios de <em>overfitting</em> al memorizar el conjunto de entrenamiento sin mejorar proporcionalmente en validación.</li>
+</ul></li>
+</ol>
 </section>
 </section>
 

@@ -157,6 +157,7 @@ def ejecutar_experimentos(X_train, y_train, X_val, y_val, grid_experimentos, epo
 # ==============================================================================
 if __name__ == "__main__":
     grid = [
+
         {"hidden_layers": [32], "batch_size": 32, "learning_rate": 0.01},
         {"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.01},
         {"hidden_layers": [128, 64, 32], "batch_size": 32, "learning_rate": 0.01},
@@ -164,7 +165,30 @@ if __name__ == "__main__":
         {"hidden_layers": [64, 32], "batch_size": 64, "learning_rate": 0.01},
         {"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.001},
         {"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.0001},
-    ]
+
+        ]
+    #2 modelo de pruebas.Excede umbrales
+    #grid = [
+    # 1. Variación de Arquitectura (Base: batch=32, lr=0.01)
+    #{"hidden_layers": [32], "batch_size": 32, "learning_rate": 0.01},
+    #{"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.01},
+    #{"hidden_layers": [128, 64, 32], "batch_size": 32, "learning_rate": 0.01},
+    #{"hidden_layers": [256, 128, 64, 32], "batch_size": 32, "learning_rate": 0.01},  # Red compleja (4 capas)
+
+    # 2. Variación de Tamaño de Lote (Base: [64, 32], lr=0.01)
+    #{"hidden_layers": [64, 32], "batch_size": 16, "learning_rate": 0.01},
+    #{"hidden_layers": [64, 32], "batch_size": 64, "learning_rate": 0.01},
+
+    # 3. Variación de Tasa de Aprendizaje (Base: [64, 32], batch=32)
+    #{"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.001},
+    #{"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.0001},
+
+    # 4. Combinaciones Cruzadas Interesantes
+    #{"hidden_layers": [128, 64, 32], "batch_size": 32, "learning_rate": 0.0001},
+    #{"hidden_layers": [256, 128, 64, 32], "batch_size": 32, "learning_rate": 0.001},
+    #]
+
+
 
     df_res, historico_exp = ejecutar_experimentos(
         X_train, y_train, X_val, y_val, grid_experimentos=grid, epochs=15
