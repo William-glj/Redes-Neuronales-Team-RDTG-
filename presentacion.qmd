@@ -4,13 +4,15 @@ subtitle: "Tomas | Ramón | Dylan | Guillermo"
 format: html
 editor: visual
 ---
- ---  ⚠️⚠️⚠️ poner otro resumen
+ ---  
 
-En este proyecto analizamos el sector cinematográfico a través del conjunto de datos de TMDB con el objetivo de predecir si una película se convertirá en un éxito de taquilla («taquillazo») mediante un modelo de clasificación basado en redes neuronales con PyTorch. El flujo de trabajo abarca desde un Análisis Exploratorio de Datos (EDA) —donde limpiamos registros, tratamos nulos y analizamos variables clave como presupuesto, géneros o duración— hasta la definición de la arquitectura de deep learning y la experimentación con hiperparámetros (capas ocultas, número de neuronas, learning rate y batch size) para identificar la configuración con mejor rendimiento predictivo.
+En este proyecto analizamos el sector cinematográfico a través del conjunto de datos de TMDB con el objetivo de predecir el nivel de popularidad de una película (clasificándola en diferentes categorías como baja, media, alta o muy alta) mediante un modelo de clasificación multiclase basado en redes neuronales con PyTorch. El flujo de trabajo abarca desde un Análisis Exploratorio de Datos (EDA) —donde limpiamos registros, tratamos valores nulos y analizamos variables clave como presupuesto, ingresos, géneros o duración— hasta la definición de la arquitectura de deep learning y la experimentación sistemática con hiperparámetros (capas ocultas, tamaño de lote y tasa de aprendizaje) mediante una estrategia de búsqueda en malla (Grid Search) para identificar la configuración con mejor rendimiento predictivo.
 
 ## 1. Fase A (Obtención de Datos y Análisis Exploratorio (EDA))
 
 En este apartado en referencia al *Exploratory Data Analysis* (EDA), fundamentamos el dataset de los datos complementando  patrones, identificando anomalías y limpiando linterferencias de datos.
+
+
 
 ### 1.1. Carga de datos y limpieza inicial
 
@@ -158,17 +160,14 @@ Consiste en implementar la red neuronal en PyTorch para resolver el problema de 
 
 ¿⚠️⚠️⚠️El problema elegido⚠️⚠️⚠️?
 
-!(img/taquillazo.jpeg)
 
-A nivel global se producen más de 9.500 películas al año, incliso si se reduce la escala y se capta tan solo un mes aproximadamente se siguen produciendo entre 750-800 películas al mes. Películas en las cuales se invierten recurso entre ellos; tiempo y dinero. Para lograr un objetivo: ser un taquillazo.
+A nivel global se producen más de 9.500 películas al año. Producir una obra cinematográfica exige una inversión enorme de recursos humanos, creativos y financieros, por lo que comprender qué factores impulsan el impacto de una película en el público es clave para la industria.
 
-Nuestro objetivo es reconocer o mínimamente predecir que tipo de películas pueden llegar a ser un éxito o al menos acercarse a una probabilidad exacta para conocerla.
+Nuestro propósito de este proyecto es abordar el problema como una clasificación multiclase del nivel de popularidada (High, moderately high, medium, low) partir de sus características principales. 
 
-En nuestro modelo del dataset esta categoría se representa mediante la etiqueta de popularity_level. Que se transformara en la variable dummy por excelencia.
+En nuestro conjunto de datos, esta variable objetivo se representa mediante la etiqueta `popularity_level`, la cual codificamos numéricamente para alimentar nuestro modelo de clasificación multiclase.
 
-## Planteamiento del Problema
 
-El objetivo del proyecto es predecir la categoría de popularidad de una película a partir de sus características principales, formulándolo como un problema de **clasificación multiclase**.
 
 ### 1. Definición de Variables
 
@@ -328,6 +327,7 @@ def evaluar(model, loader, criterio):
 
 ## 4. Gráficos
 ```{python}
+#| echo: false
 #| label: fig-curvas-entrenamiento
 #| fig-cap: "Evolución de la pérdida (Loss) y precisión (Accuracy) durante las 10 épocas."
 #| fig-align: "center"
@@ -365,6 +365,7 @@ plt.show()
 3. Línea Azul Continua (tab:blue) — Precisión de Validación (Val Accuracy %)
 
 ```{python}
+#| echo: false
 #| label: fig-metricas-clase
 #| fig-cap: "Métricas de Precisión, Recall y F1-Score por nivel de popularidad."
 #| fig-align: "center"
@@ -400,6 +401,43 @@ Hemos partido del conjunto de datos ya filtrado y pulcro de la fase previa. Una 
 
 El objetivo es establecer un punto de partida de rendimiento midiendo la precisión (accuracy) y la pérdida (loss) al intentar predecir la categoría de popularidad de una película a partir de sus 5 características cuantitativas.
 Ejecutar código
+
+
+## 2.4. Experimentación Sistemática y Búsqueda en Malla (Grid Search)
+
+Tras evaluar el modelo *Baseline*, implementamos una estrategia de **Grid Search** automatizada para evaluar el impacto de tres hiperparámetros clave en la capacidad de generalización de la red neuronal:
+1. **Profundidad de la red:** Evaluación de 1, 2 y 3 capas ocultas.
+2. **Tamaño del lote (*Batch Size*):** Comparativa entre lotes de 16, 32 y 64 muestras.
+3. **Tasa de aprendizaje (*Learning Rate*):** Variación de magnitud ($10^{-2}$, $10^{-3}$, $10^{-4}$).
+
+### Tabla Comparativa de Experimentos
+
+| ID | Capas Ocultas | Nº Capas | Batch Size | Learning Rate | Train Loss | Val Loss | Val Accuracy (%) | Tiempo (s) |
+|:--:|:-------------:|:--------:|:----------:|:-------------:|:----------:|:--------:|:----------------:|:----------:|
+| **Exp_4** | `[64, 32]` | 2 | 16 | 0.0100 | 0.7709 | **0.9176** | **62.89%** | 4.40 |
+| **Exp_5** | `[64, 32]` | 2 | 64 | 0.0100 | 0.7592 | **0.9114** | **62.50%** | 1.57 |
+| **Exp_1** | `[32]` | 1 | 32 | 0.0100 | 0.8013 | 0.8962 | 60.55% | 2.06 |
+| **Exp_3** | `[128, 64, 32]` | 3 | 32 | 0.0100 | 0.7497 | 0.9442 | 60.55% | 3.24 |
+| **Exp_2** | `[64, 32]` | 2 | 32 | 0.0100 | 0.7610 | 0.9147 | 60.55% | 2.55 |
+| **Exp_6** | `[64, 32]` | 2 | 32 | 0.0010 | 0.8607 | 0.9325 | 59.38% | 2.49 |
+| **Exp_7** | `[64, 32]` | 2 | 32 | 0.0001 | 1.2555 | 1.2572 | 47.27% | 2.54 |
+
+---
+
+### Análisis e Interpretación de Resultados
+
+Al analizar los resultados del Grid Search se extraen las siguientes conclusiones clave:
+
+1. **Impacto del Tamaño del Lote (*Batch Size*):**
+   * Reducir el *batch size* a **16** (**Exp_4**) ofreció la mayor precisión del experimento (**62.89%**). Esto se debe a que lotes más pequeños introducen más estocasticidad (ruido instructivo) en el cálculo de los gradientes, lo que ayuda al optimizador Adam a escapar de mínimos locales.
+   * Aumentar el lote a **64** (**Exp_5**) mantuvo un rendimiento elevado (**62.50%**) reduciendo sensiblemente el tiempo de cómputo (1.57 s frente a 4.40 s), siendo la opción más computationally efficient.
+
+2. **Efecto de la Tasa de Aprendizaje (*Learning Rate*):**
+   * Un *learning rate* de **0.01** resultó ser óptimo para la velocidad de convergencia en 15 épocas.
+   * Reducir el *learning rate* a **0.0001** (**Exp_7**) penalizó drásticamente el rendimiento (**47.27%**). En solo 15 épocas, los pasos de actualización de los pesos son demasiado pequeños, dejando la red lejos de la convergencia.
+
+3. **Profundidad de la Arquitectura:**
+   * Aumentar la red a 3 capas ocultas (`[128, 64, 32]` en **Exp_3**) logró la menor pérdida en entrenamiento (**0.7497**), pero un *Val Loss* ligeramente superior (**0.9442**). Esto indica que redes más complejas empiezan a mostrar indicios de *overfitting* al memorizar el conjunto de entrenamiento sin mejorar proporcionalmente en validación.
 
 
 
