@@ -31,9 +31,18 @@ y la preparación de la defensa en `redes neuronales/GUIA_EXPOSICION.md`.
 
 **Comprobado:** limpieza, modelo inicial, 24 entrenamientos, separación de
 datos, predicciones de los pesos guardados y generación del HTML con Quarto.
-**Pendiente antes de entregar:** revisión por el equipo, confirmar la fuente
-original del dataset y publicar el informe. El workflow de `.github/workflows/informe.yml` prepara y publica
+La fuente pública se ha contrastado con Kaggle y se documentan sus diferencias.
+Para preparar la defensa, empezar por `redes neuronales/GUIA_EXPOSICION.md`
+y abrir la copia local `redes neuronales/presentacion.html`.
+`redes neuronales/EXPLICACION_COMPLETA.md` explica el proyecto desde cero.
+El repaso interactivo `redes neuronales/repaso_proyecto.html` se abre en el
+navegador y permite reproducir las explicaciones o elegir un capítulo.
+
+**Pendiente antes de entregar:** revisión por el equipo y completar la
+publicación del informe. El workflow de `.github/workflows/informe.yml` prepara y publica
 la web cuando se suben los cambios a `desarrollo` y se activa GitHub Pages con Actions.
+El entorno `github-pages` también debe permitir esa rama; la primera publicación
+quedó bloqueada por esa regla. Ver `redes neuronales/ANTES_DE_PRESENTAR.md`.
 
 Esta revisión continúa la rama `desarrollo` del equipo. Conserva sus cinco
 variables, el modelo inicial y las siete configuraciones de partida. Se añade

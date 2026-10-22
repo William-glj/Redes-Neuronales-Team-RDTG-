@@ -9,9 +9,14 @@
 - [x] Guardar métricas, curvas, matriz de confusión, predicciones y pesos.
 - [x] Comparar con clase mayoritaria y regresión logística.
 - [x] Generar el informe Quarto y la guía oral para cuatro personas.
-- [ ] Confirmar la fuente original y la creación de las etiquetas.
+- [x] Contrastar una fuente pública, reproducir la selección y las etiquetas, y documentar sus límites.
+- [x] Corregir 12 fechas con el siglo incorrecto en el CSV limpio.
+- [x] Completar guion oral, ejemplos reales y explicación de PyTorch para Dylan.
+- [x] Subir la primera revisión a `desarrollo` (commit `2f5399d`).
+- [x] Preparar la explicación completa y el repaso interactivo para estudiar.
+- [x] Subir la revisión final a `desarrollo`.
 - [ ] Revisar y comprender el trabajo entre los cuatro.
-- [ ] Subir a `desarrollo` y comprobar la web publicada.
+- [ ] Permitir el despliegue de `desarrollo` y comprobar la web publicada.
 - [ ] Verificar el registro de integrantes y repositorio en Loop.
 - [ ] Publicar la URL en Loop y ensayar la exposición.
 

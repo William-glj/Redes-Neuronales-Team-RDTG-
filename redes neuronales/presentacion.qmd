@@ -31,18 +31,23 @@ El archivo de partida es `datos/peliculas_original.csv`, llamado originalmente
 [repositorio del equipo, rama desarrollo](https://github.com/William-glj/Redes-Neuronales-Team-RDTG-/tree/desarrollo).
 Contiene 1.287 películas con años de estreno entre 1961 y 2015.
 
-Su estructura coincide con una selección de datos históricos de TMDB:
-presupuesto, recaudación, duración, géneros, votos y puntuaciones.
-Esto **no demuestra el origen exacto** de esta versión ni cómo se hizo la
-selección. No presentamos estos 1.287 registros como el catálogo completo
-de TMDB ni como el dataset de 5.000 películas de Kaggle.
+Hemos contrastado esta selección con el dataset público
+[TMDb Movies Dataset, publicado por Juzer Shakir en Kaggle](https://www.kaggle.com/datasets/juzershakir/tmdb-movies-dataset).
+Su versión 1 contiene 10.866 películas y 21 columnas. Los mismos 1.287
+identificadores se obtienen al sustituir por nulos los ceros de presupuesto
+y recaudación, eliminar filas con nulos y quitar duplicados. No presentamos
+esta selección como todo el catálogo de TMDB ni como el dataset TMDB 5000.
 
-::: {.callout-warning}
-## Procedencia que debe confirmar el equipo
-Falta recuperar el enlace de descarga original de esta selección y sus
-condiciones de uso. La copia recibida no lo documenta. El repositorio identifica
-el archivo utilizado, pero no sustituye la atribución a la fuente original.
-:::
+La comparación de sus 21 columnas identifica diferencias de formato,
+redondeo y 12 fechas con el siglo incorrecto en la copia recibida. El año
+separado `release_year` sí coincide con el público; corregimos las fechas
+en el EDA. La selección previa de casos completos limita la representatividad.
+
+La comprobación está en `comprobar_fuente.py`, `datos/fuente.md` y
+`datos/fuente_verificada.json`. Verifica una fuente pública equivalente;
+no acredita desde qué enlace descargó el equipo la copia antigua. La ficha
+consultada indica licencia **Unknown**, por lo que no atribuimos una licencia
+abierta que no está documentada.
 
 Para la definición del indicador consultamos la
 [documentación oficial de TMDB](https://developer.themoviedb.org/docs/popularity-and-trending).
@@ -136,10 +141,16 @@ relacionada con el indicador, lo que refuerza el carácter retrospectivo del eje
 ## Qué queremos clasificar
 
 La variable dependiente es `popularity_level`. Conservamos las cuatro
-etiquetas que ya venían en el archivo. Sus rangos son compatibles con una
-división por cuartiles, pero **no disponemos del procedimiento original**.
-No recalculamos sus límites con la prueba final. Los rangos observados se
-guardan en `resultados/rangos_categorias.csv` como auditoría descriptiva.
+etiquetas que ya venían en el archivo. Hemos comprobado que se reproducen con
+`pd.cut` usando mínimo, cuartiles y máximo de la popularidad de las 1.287
+películas. La fila del mínimo queda sin etiqueta si no se incluye el extremo
+inferior. Esa es la fila que eliminamos. No conservamos el código antiguo que
+creó la columna: hemos verificado una forma de reproducirla.
+
+Los cortes son propios de esta muestra, no categorías oficiales de TMDB.
+No redefinimos las etiquetas ni elegimos cortes para mejorar el resultado de
+prueba. La comprobación posterior de procedencia no cambia el entrenamiento.
+Los rangos tras limpiar se guardan en `resultados/rangos_categorias.csv`.
 
 | Etiqueta original | Nombre en el informe | Código para PyTorch |
 | --- | --- | --- |
@@ -278,8 +289,9 @@ de 64 se mantiene en `preparacion_datos_entrenamiento.py` y tiene 10 épocas.
 
 - La muestra es pequeña, histórica y ya estaba seleccionada antes de recibirla.
   No representa todas las películas ni la situación actual del cine.
-- Falta confirmar el origen exacto y la creación de las etiquetas. El análisis
-  es exploratorio y está condicionado por esas etiquetas heredadas.
+- Hemos verificado una fuente pública equivalente y reproducido las etiquetas,
+  pero no conservamos el historial completo de la preparación antigua.
+  El análisis está condicionado por esa selección y sus etiquetas heredadas.
 - Se usan variables posteriores al estreno y relacionadas con el indicador.
   No afirmamos que el modelo pronostique futuros éxitos.
 - El umbral de 10.000 excluye películas independientes válidas. Es una
@@ -311,6 +323,7 @@ completa se hace con los comandos anteriores. Los archivos iniciales se
 conservan en `originales/` para poder revisar qué cambió.
 
 - [Repositorio del equipo](https://github.com/William-glj/Redes-Neuronales-Team-RDTG-).
+- [Dataset público contrastado: TMDb Movies Dataset, Juzer Shakir](https://www.kaggle.com/datasets/juzershakir/tmdb-movies-dataset).
 - [Popularidad en TMDB](https://developer.themoviedb.org/docs/popularity-and-trending).
 - [Introducción oficial a PyTorch](https://docs.pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html).
 - [CrossEntropyLoss](https://docs.pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html).

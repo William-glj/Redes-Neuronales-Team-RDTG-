@@ -1,0 +1,22 @@
+{
+  "estado": "correcto",
+  "filas_limpias": 1276,
+  "particiones": [
+    893,
+    191,
+    192
+  ],
+  "modelos_con_metricas_de_validacion_reproducidas": 24,
+  "fechas_corregidas": 12,
+  "aciertos_semilla_42": 117,
+  "peliculas_prueba": 192,
+  "entradas_etiquetas_y_predicciones_sin_cambios": true,
+  "originales_intactos": true,
+  "accuracy_prueba_media": 0.609375,
+  "f1_prueba_media": 0.6026600276398034,
+  "experimento": "Exp_2",
+  "informe_quarto_generado": true,
+  "figuras_incrustadas": 10,
+  "recursos_externos_necesarios": [],
+  "anclas_internas_validas": true
+}

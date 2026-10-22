@@ -40,9 +40,28 @@ Los porcentajes de esta revisión no se comparan directamente con los de la
 presentación anterior: cambian el reparto y la preparación de los datos.
 Tampoco deben mezclarse con el primer ensayo local basado en la copia de main.
 
-## Pendiente de confirmar por el equipo
+## Cierre local para la defensa del 23 de octubre
 
-- Fuente original exacta del CSV y creación de las etiquetas.
+- Se contrasta TMDb Movies Dataset de Juzer Shakir en Kaggle: 1.287
+  identificadores reproducidos a partir de los 10.866 registros públicos.
+- `comprobar_fuente.py` verifica las 21 columnas con diferencias documentadas,
+  reproduce `profit` y las categorías y guarda hashes y cortes en JSON.
+- Se encuentran 12 fechas con el siglo incorrecto. Se corrigen solo en el
+  CSV limpio usando el año contrastado, que ya era correcto en las entradas.
+- Se añaden al informe dos aciertos y dos errores reales de la prueba,
+  extraídos automáticamente de las predicciones de la semilla 42.
+- Se completa la guía con cifras, guion para los cuatro y explicación pausada
+  para Dylan. Se prepara `ANTES_DE_PRESENTAR.md` para el ensayo y la entrega.
+- Se añade `EXPLICACION_COMPLETA.md` y un repaso interactivo de 25 capítulos
+  en `repaso_proyecto.html`, con controles de reproducción y lectura opcional.
+- La primera revisión está subida en `2f5399d`. Su ejecución de Actions hizo
+  correctamente EDA, entrenamiento y render, con las mismas métricas finales
+  que en local; el despliegue quedó bloqueado por la política de `github-pages`.
+
+## Pendiente por el equipo
+
+- Revisar la nueva preparación local y comprender las cuatro intervenciones.
+- Completar la configuración de publicación con un administrador.
 - Registro de integrantes/repositorio en Loop.
 - Publicación y comprobación de la URL final; exposición de los cuatro integrantes.
 

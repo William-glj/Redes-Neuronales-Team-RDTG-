@@ -3,7 +3,7 @@
 import json
 import numpy as np
 import pandas as pd
-from EDA import CARPETA, NOMBRES, tabla_markdown
+from EDA import CARPETA, CATEGORIAS, NOMBRES, tabla_markdown
 
 
 def generar_resultados():
@@ -126,6 +126,17 @@ a generar el HTML con `quarto render`.
     metricas_clases = metricas_clases.reset_index().rename(columns={"index": "Categoría"})
     config = resumen["configuracion"]
     filas = resumen["filas"]
+    predicciones = pd.read_csv(carpeta / "predicciones_prueba.csv")
+    # Ejemplos para explicar la evaluación: los dos primeros de cada grupo.
+    ejemplos = pd.concat([predicciones[predicciones["acierto"]].head(2),
+                          predicciones[~predicciones["acierto"]].head(2)])
+    ejemplos.to_csv(carpeta / "ejemplos_defensa.csv", index=False)
+    ejemplos = ejemplos[["original_title", "popularity_level", "prediccion", "acierto"]].copy()
+    traduccion = dict(zip(CATEGORIAS, NOMBRES))
+    for columna in ["popularity_level", "prediccion"]:
+        ejemplos[columna] = ejemplos[columna].map(traduccion)
+    ejemplos["acierto"] = ejemplos["acierto"].map({True: "Sí", False: "No"})
+    ejemplos.columns = ["Película", "Categoría real", "Predicción", "Acierto"]
     segunda = comparacion.iloc[1]
     diferencia_validacion = comparacion.iloc[0]["f1_validacion"] - segunda["f1_validacion"]
     puntuaciones = comparacion.set_index("experimento")["f1_validacion"]
@@ -240,6 +251,19 @@ Para la matriz y los ejemplos usamos siempre la semilla 42: accuracy
 {comentario_error}
 
 {tabla_markdown(metricas_clases)}
+
+## Ejemplos de películas de prueba
+
+Mostramos los dos primeros aciertos y los dos primeros errores del archivo
+de predicciones de la semilla 42. Son ejemplos para entender la salida del
+modelo; no son una muestra representativa ni se utilizan para elegir la red.
+
+{tabla_markdown(ejemplos)}
+
+Una predicción equivocada no cambia la etiqueta real. Por ejemplo, una
+película puede aparecer en Media-alta y ser clasificada como Alta. Eso cuenta
+como un error igual que cualquier otra confusión, porque hemos utilizado
+clasificación nominal con CrossEntropyLoss.
 
 ## Comparación con referencias sencillas
 

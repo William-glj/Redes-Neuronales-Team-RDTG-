@@ -4070,8 +4070,9 @@ vertical-align: -.125em;
   <li><a href="#comparación-de-configuraciones" id="toc-comparación-de-configuraciones" class="nav-link" data-scroll-target="#comparación-de-configuraciones"><span class="header-section-number">5.2</span> Comparación de configuraciones</a></li>
   <li><a href="#curvas-de-aprendizaje" id="toc-curvas-de-aprendizaje" class="nav-link" data-scroll-target="#curvas-de-aprendizaje"><span class="header-section-number">5.3</span> Curvas de aprendizaje</a></li>
   <li><a href="#evaluación-final-en-prueba" id="toc-evaluación-final-en-prueba" class="nav-link" data-scroll-target="#evaluación-final-en-prueba"><span class="header-section-number">5.4</span> Evaluación final en prueba</a></li>
-  <li><a href="#comparación-con-referencias-sencillas" id="toc-comparación-con-referencias-sencillas" class="nav-link" data-scroll-target="#comparación-con-referencias-sencillas"><span class="header-section-number">5.5</span> Comparación con referencias sencillas</a></li>
-  <li><a href="#conclusiones-de-los-resultados" id="toc-conclusiones-de-los-resultados" class="nav-link" data-scroll-target="#conclusiones-de-los-resultados"><span class="header-section-number">5.6</span> Conclusiones de los resultados</a></li>
+  <li><a href="#ejemplos-de-películas-de-prueba" id="toc-ejemplos-de-películas-de-prueba" class="nav-link" data-scroll-target="#ejemplos-de-películas-de-prueba"><span class="header-section-number">5.5</span> Ejemplos de películas de prueba</a></li>
+  <li><a href="#comparación-con-referencias-sencillas" id="toc-comparación-con-referencias-sencillas" class="nav-link" data-scroll-target="#comparación-con-referencias-sencillas"><span class="header-section-number">5.6</span> Comparación con referencias sencillas</a></li>
+  <li><a href="#conclusiones-de-los-resultados" id="toc-conclusiones-de-los-resultados" class="nav-link" data-scroll-target="#conclusiones-de-los-resultados"><span class="header-section-number">5.7</span> Conclusiones de los resultados</a></li>
   </ul></li>
   <li><a href="#limitaciones-y-mejoras" id="toc-limitaciones-y-mejoras" class="nav-link" data-scroll-target="#limitaciones-y-mejoras"><span class="header-section-number">6</span> Limitaciones y mejoras</a></li>
   <li><a href="#reproducción-y-referencias" id="toc-reproducción-y-referencias" class="nav-link" data-scroll-target="#reproducción-y-referencias"><span class="header-section-number">7</span> Reproducción y referencias</a></li>
@@ -4121,20 +4122,9 @@ vertical-align: -.125em;
 <section id="datos-y-procedencia" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="datos-y-procedencia"><span class="header-section-number">1.1</span> Datos y procedencia</h2>
 <p>El archivo de partida es <code>datos/peliculas_original.csv</code>, llamado originalmente <code>TMBD Movie Dataset.csv</code>. Es la copia que ya estaba en el <a href="https://github.com/William-glj/Redes-Neuronales-Team-RDTG-/tree/desarrollo">repositorio del equipo, rama desarrollo</a>. Contiene 1.287 películas con años de estreno entre 1961 y 2015.</p>
-<p>Su estructura coincide con una selección de datos históricos de TMDB: presupuesto, recaudación, duración, géneros, votos y puntuaciones. Esto <strong>no demuestra el origen exacto</strong> de esta versión ni cómo se hizo la selección. No presentamos estos 1.287 registros como el catálogo completo de TMDB ni como el dataset de 5.000 películas de Kaggle.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Advertencia</span>Procedencia que debe confirmar el equipo
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Falta recuperar el enlace de descarga original de esta selección y sus condiciones de uso. La copia recibida no lo documenta. El repositorio identifica el archivo utilizado, pero no sustituye la atribución a la fuente original.</p>
-</div>
-</div>
+<p>Hemos contrastado esta selección con el dataset público <a href="https://www.kaggle.com/datasets/juzershakir/tmdb-movies-dataset">TMDb Movies Dataset, publicado por Juzer Shakir en Kaggle</a>. Su versión 1 contiene 10.866 películas y 21 columnas. Los mismos 1.287 identificadores se obtienen al sustituir por nulos los ceros de presupuesto y recaudación, eliminar filas con nulos y quitar duplicados. No presentamos esta selección como todo el catálogo de TMDB ni como el dataset TMDB 5000.</p>
+<p>La comparación de sus 21 columnas identifica diferencias de formato, redondeo y 12 fechas con el siglo incorrecto en la copia recibida. El año separado <code>release_year</code> sí coincide con el público; corregimos las fechas en el EDA. La selección previa de casos completos limita la representatividad.</p>
+<p>La comprobación está en <code>comprobar_fuente.py</code>, <code>datos/fuente.md</code> y <code>datos/fuente_verificada.json</code>. Verifica una fuente pública equivalente; no acredita desde qué enlace descargó el equipo la copia antigua. La ficha consultada indica licencia <strong>Unknown</strong>, por lo que no atribuimos una licencia abierta que no está documentada.</p>
 <p>Para la definición del indicador consultamos la <a href="https://developer.themoviedb.org/docs/popularity-and-trending">documentación oficial de TMDB</a>. Actualmente describe la popularidad usando, entre otros factores, votos, visitas y fecha de estreno. No podemos asegurar que su fórmula histórica fuera idéntica. El número de votos es una señal muy relacionada con la popularidad: esta clasificación reconstruye un indicador de la muestra, no demuestra una relación causal.</p>
 </section>
 </section>
@@ -4151,8 +4141,12 @@ vertical-align: -.125em;
 <p>Partimos de <strong>1287 películas</strong> y <strong>24 columnas</strong>, contando el índice exportado. Hay <strong>0 identificadores duplicados</strong> y <strong>1 película sin una categoría válida</strong>. Eliminamos esa fila para no inventar su respuesta. Conservamos <strong>1276 películas</strong>.</p>
 <p>Conservamos la selección de la rama <code>desarrollo</code>: presupuesto y recaudación superiores a 10.000. El filtro excluye <strong>10 películas</strong>. Es una delimitación de la muestra comercial, no una prueba de que los importes bajos sean erróneos: también excluye películas independientes que pueden ser válidas. Esto limita la representatividad y no garantiza que los importes restantes sean correctos. La eliminación de la categoría ausente es un paso adicional.</p>
 <p>No se han imputado medianas con toda la muestra. La preparación posterior calcula las medianas y la normalización únicamente con entrenamiento.</p>
-<section id="valores-nulos-en-el-archivo-recibido" class="level3" data-number="2.0.1">
-<h3 data-number="2.0.1" class="anchored" data-anchor-id="valores-nulos-en-el-archivo-recibido"><span class="header-section-number">2.0.1</span> Valores nulos en el archivo recibido</h3>
+<section id="fechas-incoherentes" class="level3" data-number="2.0.1">
+<h3 data-number="2.0.1" class="anchored" data-anchor-id="fechas-incoherentes"><span class="header-section-number">2.0.1</span> Fechas incoherentes</h3>
+<p>Encontramos <strong>12 fechas con el siglo incorrecto</strong>: algunas películas antiguas aparecían fechadas entre 2061 y 2071. Contrastamos <code>release_year</code> con la fuente pública y lo usamos para corregir el año de <code>release_date</code>, conservando mes y día. Los cambios están en <code>resultados/fechas_corregidas.csv</code>. El año que entra en la red ya era correcto: la corrección de la fecha no modifica las cinco entradas del modelo.</p>
+</section>
+<section id="valores-nulos-en-el-archivo-recibido" class="level3" data-number="2.0.2">
+<h3 data-number="2.0.2" class="anchored" data-anchor-id="valores-nulos-en-el-archivo-recibido"><span class="header-section-number">2.0.2</span> Valores nulos en el archivo recibido</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -4280,8 +4274,8 @@ vertical-align: -.125em;
 </tbody>
 </table>
 </section>
-<section id="distribución-de-las-clases" class="level3" data-number="2.0.2">
-<h3 data-number="2.0.2" class="anchored" data-anchor-id="distribución-de-las-clases"><span class="header-section-number">2.0.2</span> Distribución de las clases</h3>
+<section id="distribución-de-las-clases" class="level3" data-number="2.0.3">
+<h3 data-number="2.0.3" class="anchored" data-anchor-id="distribución-de-las-clases"><span class="header-section-number">2.0.3</span> Distribución de las clases</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -4309,8 +4303,8 @@ vertical-align: -.125em;
 </tbody>
 </table>
 </section>
-<section id="valores-extremos" class="level3" data-number="2.0.3">
-<h3 data-number="2.0.3" class="anchored" data-anchor-id="valores-extremos"><span class="header-section-number">2.0.3</span> Valores extremos</h3>
+<section id="valores-extremos" class="level3" data-number="2.0.4">
+<h3 data-number="2.0.4" class="anchored" data-anchor-id="valores-extremos"><span class="header-section-number">2.0.4</span> Valores extremos</h3>
 <p>El criterio IQR señala valores por debajo de Q1 − 1,5 × IQR o por encima de Q3 + 1,5 × IQR. Señalar un valor no demuestra que sea un error.</p>
 <table class="caption-top table">
 <thead>
@@ -4413,7 +4407,8 @@ vertical-align: -.125em;
 <h1 data-number="3"><span class="header-section-number">3</span> Definición del problema</h1>
 <section id="qué-queremos-clasificar" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="qué-queremos-clasificar"><span class="header-section-number">3.1</span> Qué queremos clasificar</h2>
-<p>La variable dependiente es <code>popularity_level</code>. Conservamos las cuatro etiquetas que ya venían en el archivo. Sus rangos son compatibles con una división por cuartiles, pero <strong>no disponemos del procedimiento original</strong>. No recalculamos sus límites con la prueba final. Los rangos observados se guardan en <code>resultados/rangos_categorias.csv</code> como auditoría descriptiva.</p>
+<p>La variable dependiente es <code>popularity_level</code>. Conservamos las cuatro etiquetas que ya venían en el archivo. Hemos comprobado que se reproducen con <code>pd.cut</code> usando mínimo, cuartiles y máximo de la popularidad de las 1.287 películas. La fila del mínimo queda sin etiqueta si no se incluye el extremo inferior. Esa es la fila que eliminamos. No conservamos el código antiguo que creó la columna: hemos verificado una forma de reproducirla.</p>
+<p>Los cortes son propios de esta muestra, no categorías oficiales de TMDB. No redefinimos las etiquetas ni elegimos cortes para mejorar el resultado de prueba. La comprobación posterior de procedencia no cambia el entrenamiento. Los rangos tras limpiar se guardan en <code>resultados/rangos_categorias.csv</code>.</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -4828,8 +4823,49 @@ vertical-align: -.125em;
 </tbody>
 </table>
 </section>
-<section id="comparación-con-referencias-sencillas" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="comparación-con-referencias-sencillas"><span class="header-section-number">5.5</span> Comparación con referencias sencillas</h2>
+<section id="ejemplos-de-películas-de-prueba" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="ejemplos-de-películas-de-prueba"><span class="header-section-number">5.5</span> Ejemplos de películas de prueba</h2>
+<p>Mostramos los dos primeros aciertos y los dos primeros errores del archivo de predicciones de la semilla 42. Son ejemplos para entender la salida del modelo; no son una muestra representativa ni se utilizan para elegir la red.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Película</th>
+<th>Categoría real</th>
+<th>Predicción</th>
+<th>Acierto</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Shrek 2</td>
+<td>Alta</td>
+<td>Alta</td>
+<td>Sí</td>
+</tr>
+<tr class="even">
+<td>The Incredibles</td>
+<td>Alta</td>
+<td>Alta</td>
+<td>Sí</td>
+</tr>
+<tr class="odd">
+<td>Gangster Squad</td>
+<td>Media-alta</td>
+<td>Alta</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Boys Don’t Cry</td>
+<td>Media-alta</td>
+<td>Baja</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>Una predicción equivocada no cambia la etiqueta real. Por ejemplo, una película puede aparecer en Media-alta y ser clasificada como Alta. Eso cuenta como un error igual que cualquier otra confusión, porque hemos utilizado clasificación nominal con CrossEntropyLoss.</p>
+</section>
+<section id="comparación-con-referencias-sencillas" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="comparación-con-referencias-sencillas"><span class="header-section-number">5.6</span> Comparación con referencias sencillas</h2>
 <p>La clase mayoritaria se decide usando entrenamiento. La regresión logística usa las mismas entradas normalizadas y es un clasificador, a pesar de su nombre. No hemos ajustado sus hiperparámetros. Estas referencias ayudan a valorar si la red aporta algo frente a soluciones menos complejas.</p>
 <table class="caption-top table">
 <colgroup>
@@ -4866,8 +4902,8 @@ vertical-align: -.125em;
 </tbody>
 </table>
 </section>
-<section id="conclusiones-de-los-resultados" class="level2" data-number="5.6">
-<h2 data-number="5.6" class="anchored" data-anchor-id="conclusiones-de-los-resultados"><span class="header-section-number">5.6</span> Conclusiones de los resultados</h2>
+<section id="conclusiones-de-los-resultados" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="conclusiones-de-los-resultados"><span class="header-section-number">5.7</span> Conclusiones de los resultados</h2>
 <ol type="1">
 <li><strong>Exp_2</strong> es la configuración seleccionada por validación en este ensayo. Eso no implica que sea la mejor red para cualquier dataset.</li>
 <li>La red obtiene un F1 macro medio 0.015 superior al de la regresión logística en esta partición. Es una diferencia observada, no una prueba de superioridad general ni de significación estadística.</li>
@@ -4881,7 +4917,7 @@ vertical-align: -.125em;
 <h1 data-number="6"><span class="header-section-number">6</span> Limitaciones y mejoras</h1>
 <ul>
 <li>La muestra es pequeña, histórica y ya estaba seleccionada antes de recibirla. No representa todas las películas ni la situación actual del cine.</li>
-<li>Falta confirmar el origen exacto y la creación de las etiquetas. El análisis es exploratorio y está condicionado por esas etiquetas heredadas.</li>
+<li>Hemos verificado una fuente pública equivalente y reproducido las etiquetas, pero no conservamos el historial completo de la preparación antigua. El análisis está condicionado por esa selección y sus etiquetas heredadas.</li>
 <li>Se usan variables posteriores al estreno y relacionadas con el indicador. No afirmamos que el modelo pronostique futuros éxitos.</li>
 <li>El umbral de 10.000 excluye películas independientes válidas. Es una selección comercial heredada del proyecto y limita a qué películas se pueden extrapolar los resultados. No hemos verificado todas las cifras.</li>
 <li>El EDA describe la muestra completa. Los parámetros del preprocesado se ajustan solo con entrenamiento; no hemos rediseñado el modelo tras observar la prueba final.</li>
@@ -4898,6 +4934,7 @@ vertical-align: -.125em;
 <p>El informe se genera a partir de este <code>.qmd</code> y de los fragmentos que producen los scripts. Los bloques de código del informe son explicativos; la ejecución completa se hace con los comandos anteriores. Los archivos iniciales se conservan en <code>originales/</code> para poder revisar qué cambió.</p>
 <ul>
 <li><a href="https://github.com/William-glj/Redes-Neuronales-Team-RDTG-">Repositorio del equipo</a>.</li>
+<li><a href="https://www.kaggle.com/datasets/juzershakir/tmdb-movies-dataset">Dataset público contrastado: TMDb Movies Dataset, Juzer Shakir</a>.</li>
 <li><a href="https://developer.themoviedb.org/docs/popularity-and-trending">Popularidad en TMDB</a>.</li>
 <li><a href="https://docs.pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html">Introducción oficial a PyTorch</a>.</li>
 <li><a href="https://docs.pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html">CrossEntropyLoss</a>.</li>

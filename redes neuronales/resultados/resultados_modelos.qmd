@@ -123,6 +123,25 @@ El error más frecuente de la matriz es confundir **Media** con **Baja**, en **1
 | Alta | 0.8077 | 0.8571 | 0.8317 | 49.0 |
 
 
+## Ejemplos de películas de prueba
+
+Mostramos los dos primeros aciertos y los dos primeros errores del archivo
+de predicciones de la semilla 42. Son ejemplos para entender la salida del
+modelo; no son una muestra representativa ni se utilizan para elegir la red.
+
+| Película | Categoría real | Predicción | Acierto |
+| --- | --- | --- | --- |
+| Shrek 2 | Alta | Alta | Sí |
+| The Incredibles | Alta | Alta | Sí |
+| Gangster Squad | Media-alta | Alta | No |
+| Boys Don't Cry | Media-alta | Baja | No |
+
+
+Una predicción equivocada no cambia la etiqueta real. Por ejemplo, una
+película puede aparecer en Media-alta y ser clasificada como Alta. Eso cuenta
+como un error igual que cualquier otra confusión, porque hemos utilizado
+clasificación nominal con CrossEntropyLoss.
+
 ## Comparación con referencias sencillas
 
 La clase mayoritaria se decide usando entrenamiento. La regresión logística

@@ -2,6 +2,18 @@
 
 Equipo: José Ramón, Guillermo, Dylan y Tomás. 2.º DAW.
 
+## Para preparar la exposición de mañana
+
+1. Abrir `presentacion.html`: informe completo con recursos incrustados, para leerlo sin ejecutar Python.
+2. Repartir `GUIA_EXPOSICION.md`: incluye resultados concretos, ejemplos y guion para los cuatro.
+3. Dylan puede estudiar `EXPLICACION_DYLAN.md` para entender la red y el bucle paso a paso.
+4. Revisar `ANTES_DE_PRESENTAR.md`: ensayo, apertura local y publicación pendiente.
+5. Leer `EXPLICACION_COMPLETA.md` para entender el recorrido desde cero.
+6. Abrir `repaso_proyecto.html` con Chrome, Edge o Safari y pulsar **Reproducir**.
+   Incluye 25 capítulos, explicaciones visuales y el guion completo. La opción
+   **Leer con voz** depende de las voces disponibles en el navegador; el texto
+   y las imágenes funcionan sin conexión. Es un repaso interactivo en HTML.
+
 ## Estado de esta versión
 
 La base de esta revisión es la rama **`desarrollo`**, commit
@@ -19,8 +31,10 @@ predicciones y no hay películas compartidas entre los conjuntos.
 
 El entrenamiento y los gráficos usan las dependencias de `requirements.txt`.
 El informe indica explícitamente si no hay métricas de una ejecución completa.
-También falta que
-el equipo confirme la fuente original del CSV en `datos/fuente.md`.
+Se ha contrastado una fuente pública en Kaggle, reproducido la selección de
+1.287 identificadores y las etiquetas, y documentado las diferencias en
+`datos/fuente.md`. El EDA corrige 12 fechas con el siglo incorrecto; las cinco
+entradas de la red no cambian. Se conserva el CSV recibido sin modificar.
 
 ## Instalación en macOS
 
@@ -87,12 +101,17 @@ EDA, entrenamiento y render en ese orden.
 | `preparacion_datos_entrenamiento.py` | Modelo inicial: dos capas de 64 y diez épocas. |
 | `preparacion_hiperparametros_modulares.py` | Ocho configuraciones, tres semillas y evaluación final. |
 | `generar_informe.py` | Figuras y texto de resultados a partir de las métricas reales. |
+| `comprobar_fuente.py` | Comparación opcional con el ZIP público de Kaggle. |
 | `presentacion.qmd` y `_quarto.yml` | Fuente y configuración del informe Quarto. |
 | `datos/` | CSV recibido, CSV limpio y notas de procedencia. |
 | `originales/` | Script y CSV limpio de la versión inicial, sin ejecutar. |
 | `resultados/` | Tablas, divisiones, predicciones, curvas numéricas y pesos entrenados. |
 | `graficos/` | Imágenes generadas con matplotlib. |
 | `GUIA_EXPOSICION.md` | Reparto, explicación del código y preguntas de defensa. |
+| `EXPLICACION_DYLAN.md` | Explicación pausada de la red y el entrenamiento. |
+| `EXPLICACION_COMPLETA.md` | Guía de todo el proyecto desde cero, con resultados y preguntas. |
+| `repaso_proyecto.html` | Repaso visual con reproducción, pausa y selección de capítulos. |
+| `ANTES_DE_PRESENTAR.md` | Preparación local, ensayo y pasos de entrega pendientes. |
 | `Ejecutar_en_Colab.ipynb` | Alternativa de ejecución, después de subir esta versión al repo. |
 
 `--sin-graficos` permite ejecutar la limpieza sin matplotlib, pero no genera
@@ -104,15 +123,9 @@ La raíz incluye `.github/workflows/informe.yml`. Es la excepción de ubicación
 necesaria para que GitHub encuentre la configuración de publicación; el
 código, datos y fuente del informe están dentro de `redes neuronales`.
 
-1. Subir esta estructura al repositorio del equipo, incluyendo `.github/`.
-   Como esta carpeta procede de un ZIP, no tiene historial Git local. Se pueden
-   subir los archivos con GitHub o copiarlos a una clonación del repositorio.
-   No subir `.venv/` ni `_site/`.
-   La entrega sustituye los scripts, CSV, presentación, `Tareas.md` e `img/`
-   que estaban sueltos en la raíz de desarrollo por sus versiones organizadas
-   dentro de `redes neuronales/`. El estado anterior se conserva en
-   `originales/desarrollo/`. Revisar esos movimientos en Git para evitar dos
-   versiones activas; conservar cualquier otro trabajo del curso.
+1. Trabajar sobre la clonación de `desarrollo` y subir los cambios a esa rama.
+   La primera revisión se subió en `2f5399d`. Incluir `.github/` y conservar
+   las copias de `originales/desarrollo/`. No subir `.venv/` ni `_site/`.
 2. En el repositorio, abrir **Settings → Pages** y elegir **GitHub Actions**
    como fuente de publicación.
 3. En **Actions**, abrir **Informe de redes neuronales** y ejecutar **Run workflow**
@@ -132,7 +145,7 @@ por hecha solo por haber subido los archivos.
 
 ## Antes de entregar
 
-- Confirmar la fuente exacta del CSV y actualizar `datos/fuente.md` y `presentacion.qmd`.
+- Consultar la fuente contrastada y `datos/fuente_verificada.json`.
 - Verificar que el entrenamiento completo termina sin errores.
 - Leer las conclusiones que se generen y contrastarlas con las tablas.
 - Revisar la web publicada desde otro dispositivo.

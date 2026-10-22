@@ -13,6 +13,15 @@ sean correctos. La eliminación de la categoría ausente es un paso adicional.
 No se han imputado medianas con toda la muestra. La preparación posterior
 calcula las medianas y la normalización únicamente con entrenamiento.
 
+### Fechas incoherentes
+
+Encontramos **12 fechas con el siglo incorrecto**: algunas
+películas antiguas aparecían fechadas entre 2061 y 2071. Contrastamos
+`release_year` con la fuente pública y lo usamos para corregir el año de
+`release_date`, conservando mes y día. Los cambios están en
+`resultados/fechas_corregidas.csv`. El año que entra en la red ya era correcto:
+la corrección de la fecha no modifica las cinco entradas del modelo.
+
 ### Valores nulos en el archivo recibido
 
 | variable | tipo | nulos |

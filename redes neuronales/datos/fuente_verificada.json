@@ -1,0 +1,49 @@
+{
+  "fuente_publica": "https://www.kaggle.com/datasets/juzershakir/tmdb-movies-dataset",
+  "descarga": "https://www.kaggle.com/api/v1/datasets/download/juzershakir/tmdb-movies-dataset",
+  "publicador": "Juzer Shakir",
+  "version_kaggle": 1,
+  "licencia_indicada_en_la_ficha": "Unknown",
+  "sha256_csv_publico": "f68f5ae0dc67c07d6bd901d07df317adcd8f214c0bc085c0abc93103ba61d667",
+  "sha256_csv_recibido": "95a068b24e14ed992670838d6b95ae6d5a02269737e093e3e35badeefaebbdfd",
+  "filas_publicas": 10866,
+  "filas_seleccion_verificada": 1287,
+  "columnas_verificadas": [
+    "id",
+    "imdb_id",
+    "popularity",
+    "budget",
+    "revenue",
+    "original_title",
+    "cast",
+    "homepage",
+    "director",
+    "tagline",
+    "keywords",
+    "overview",
+    "runtime",
+    "genres",
+    "production_companies",
+    "release_date",
+    "vote_count",
+    "vote_average",
+    "release_year",
+    "budget_adj",
+    "revenue_adj"
+  ],
+  "tolerancia_numerica_general": "rtol=1e-12, atol=1e-12",
+  "columnas_con_tolerancia_relativa_1e_9": [
+    "budget_adj",
+    "revenue_adj"
+  ],
+  "fechas_recibidas_con_siglo_incorrecto": 12,
+  "cortes_popularidad": [
+    0.010335,
+    0.6647835,
+    1.152354,
+    2.1253415,
+    32.985763
+  ],
+  "etiquetas_reproducidas_incluyendo_el_nulo": 1287,
+  "nota": "Verifica una fuente pública equivalente; no acredita desde qué enlace descargó el equipo su copia."
+}

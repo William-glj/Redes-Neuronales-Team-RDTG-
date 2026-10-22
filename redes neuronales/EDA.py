@@ -84,6 +84,17 @@ def limpiar_datos():
     # Aquí conservamos los nulos numéricos para no mezclar los conjuntos.
     df["genres"] = df["genres"].fillna("").str.strip()
     df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
+    # Corregimos el siglo de las fechas que contradicen el año de estreno.
+    # Se ha contrastado ese año con la fuente pública; no cambia una entrada de la red.
+    mascara_fechas = (df["release_date"].notna() & df["release_year"].notna() &
+                      (df["release_date"].dt.year != df["release_year"]))
+    fechas_corregidas = df.loc[mascara_fechas, ["id", "original_title", "release_date"]].copy()
+    fechas_corregidas = fechas_corregidas.rename(columns={"release_date": "fecha_recibida"})
+    nuevas_fechas = (df.loc[mascara_fechas, "release_year"].astype(int).astype(str) + "-" +
+                     df.loc[mascara_fechas, "release_date"].dt.strftime("%m-%d"))
+    df.loc[mascara_fechas, "release_date"] = pd.to_datetime(nuevas_fechas, format="%Y-%m-%d")
+    fechas_corregidas["fecha_corregida"] = df.loc[mascara_fechas, "release_date"]
+    fechas_corregidas.to_csv(resultados / "fechas_corregidas.csv", index=False)
 
     atipicos = []
     for columna in NUMERICAS + ["popularity"]:
@@ -124,6 +135,15 @@ sean correctos. La eliminación de la categoría ausente es un paso adicional.
 
 No se han imputado medianas con toda la muestra. La preparación posterior
 calcula las medianas y la normalización únicamente con entrenamiento.
+
+### Fechas incoherentes
+
+Encontramos **{len(fechas_corregidas)} fechas con el siglo incorrecto**: algunas
+películas antiguas aparecían fechadas entre 2061 y 2071. Contrastamos
+`release_year` con la fuente pública y lo usamos para corregir el año de
+`release_date`, conservando mes y día. Los cambios están en
+`resultados/fechas_corregidas.csv`. El año que entra en la red ya era correcto:
+la corrección de la fecha no modifica las cinco entradas del modelo.
 
 ### Valores nulos en el archivo recibido
 
