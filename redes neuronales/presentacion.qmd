@@ -492,11 +492,47 @@ Tras seleccionar **`Exp_1`** utilizando únicamente el conjunto de validación, 
 
 El modelo final alcanza una **precisión en prueba del 67.53%**, superando en casi **4 puntos porcentuales** a la Regresión Logística y demostrando la capacidad de la red neuronal para aprender patrones no lineales eficaces a partir de las variables de entrada.
 
-## 4. Limitaciones, reproducción y referencias
+## 4. Limitaciones, Reproducción y Trabajo Futuro
 
-La muestra recibida tiene películas de 1961 a 2015 y procede de una selección de casos completos. Las cinco entradas no recogen todos los factores relacionados con la popularidad. Las categorías ya venían definidas antes de la separación y son relativas a esa selección. Votos y nota media son posteriores al estreno y están relacionados con el indicador de popularidad.
+El modelo desarrollado debe entenderse como una **prueba de concepto académica** y no como un sistema listo para entornos de producción. Aunque la red neuronal superó a las *baselines* lineales en la muestra analizada (películas de 1961 a 2015), el alcance del proyecto está acotado por la naturaleza de los datos y el uso de variables generadas únicamente tras el lanzamiento comercial (`vote_count` y `vote_average`).
 
-Utilizamos una sola partición y tres inicializaciones. La diferencia frente a otro modelo se refiere a esta prueba; no es una garantía para otras películas. Como mejoras futuras proponemos más datos, otras variables y comparar varias particiones, conservando una evaluación final independiente.
+Para garantizar un rigor analítico completo, se detallan las limitaciones metodológicas, la viabilidad en la industria real y las líneas de desarrollo futuro.
+
+---
+
+### 4.1. Análisis Crítico y Viabilidad Real
+
+* **Muestra reducida y sesgada:** El conjunto de datos es histórico (1961-2015) y previamente filtrado. No representa la totalidad de la oferta cinematográfica global ni los patrones de consumo actuales.
+* **Trazabilidad y etiquetas heredadas:** Aunque se verificó una fuente pública equivalente y se reprodujeron las etiquetas, el análisis está condicionado por la selección original de casos y sus criterios de categorización.
+* **Fuga de información (*Data Leakage*):** El uso de métricas posteriores al estreno impide que la red funcione como un predictor previo al rodaje para guiar decisiones de inversión financiera.
+* **Filtro comercial restrictivo:** El umbral de presupuesto mínimo ($10.000) excluye producciones independientes válidas, limitando la extrapolación de los resultados a proyectos de bajo presupuesto.
+* **Evaluación en partición única:** Evaluar sobre una sola división de datos acota la generalización estadística. Las tres inicializaciones empleadas mitigan la variabilidad de los pesos, pero no sustituyen una validación cruzada sistemática.
+
+::: {.callout-warning}
+## Brecha para Entornos de Producción
+A día de hoy, el modelo ignora cerca del **80% de los factores determinantes** en la industria cinematográfica actual:
+
+* **Reparto y Dirección:** Carece de métricas sobre el tirón mediático o historial de actores y directores.
+* **Propiedad Intelectual (IP):** No distingue si un título pertenece a un universo o franquicia consolidada (ej. Marvel, Star Wars) o si es una idea original.
+* **Impacto en Redes y Marketing:** No contempla el presupuesto publicitario ni la conversación en redes sociales previa al estreno.
+:::
+
+---
+
+### 4.2. Rigor Metodológico y Líneas de Mejora
+
+* **Garantía de preprocesado ciego:** Para evitar contaminación de datos, el análisis exploratorio (EDA) describe la muestra completa, pero todos los parámetros de normalización y escalado se ajustaron exclusivamente sobre el conjunto de entrenamiento. La prueba final se mantuvo totalmente inédita hasta la evaluación definitiva.
+* **Validación Cruzada y Divisibilidad Temporal:** Implementar un esquema de *K-Fold Cross-Validation* junto con una separación por corte temporal (*Temporal Split*) para medir la capacidad de la red al predecir películas de épocas posteriores a su entrenamiento.
+* **Aislamiento de Variables Pre-estreno:** Estudiar el impacto de eliminar el número de votos y la calificación media, comparando el rendimiento del modelo post-estreno actual con una arquitectura basada estrictamente en variables previas al rodaje.
+## 5. Alcance y Conclusiones propias
+
+**¿Se acerca más a los aciertos o a los errores?**
+Al analizar los resultados, vemos que el modelo funciona muy bien identificando los casos extremos, logrando más de un 83% de F1-Score en la categoría de alta popularidad y reconociendo los grandes fracasos sin problema. Sin embargo, tiene un punto ciego claro en la zona media, ya que se equivoca en casi la mitad de los casos de popularidad media o media-alta al confundirlos sistemáticamente con la categoría baja. La red acierta fácilmente en lo más evidente (los taquillazos o los fracasos estrepitosos), pero duda bastante a la hora de clasificar el cine de rango intermedio.
+
+**¿Es realmente útil?**
+A nivel práctico, el modelo presenta una limitación lógica clave: al incluir variables como la nota media y el número de votos, que solo existen tras el lanzamiento, no sirve para predecir el éxito a priori ni ayuda a un estudio a decidir si financiar un proyecto antes de rodar. Sin embargo, su utilidad real se encuentra en la etapa posterior al estreno, siendo una herramienta muy práctica para que plataformas como Netflix o Prime Video automaticen la organización y segmentación de grandes catálogos de películas en función de la recepción final del público.
+
+### Extras
 
 El código completo está en los cuatro scripts del grupo. Para reproducir los resultados, ejecutar desde `redes neuronales`:
 
