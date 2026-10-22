@@ -183,7 +183,6 @@ backward calcula gradientes y Adam actualiza los pesos. Una época recorre todo
 entrenamiento. Tomás compara los experimentos.»
 
 Mostrar: separación, cinco entradas, red `5 → 64 → 32 → 4` y bucle de aprendizaje.
-Para entenderlo despacio: `EXPLICACION_DYLAN.md`.
 
 **Tomás — Comparación y conclusión.**
 

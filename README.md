@@ -34,9 +34,6 @@ datos, predicciones de los pesos guardados y generación del HTML con Quarto.
 La fuente pública se ha contrastado con Kaggle y se documentan sus diferencias.
 Para preparar la defensa, empezar por `redes neuronales/GUIA_EXPOSICION.md`
 y abrir la copia local `redes neuronales/presentacion.html`.
-`redes neuronales/EXPLICACION_COMPLETA.md` explica el proyecto desde cero.
-El repaso interactivo `redes neuronales/repaso_proyecto.html` se abre en el
-navegador y permite reproducir las explicaciones o elegir un capítulo.
 
 **Pendiente antes de entregar:** revisión por el equipo y completar la
 publicación del informe. El workflow de `.github/workflows/informe.yml` prepara y publica

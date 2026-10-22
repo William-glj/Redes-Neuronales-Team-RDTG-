@@ -50,10 +50,8 @@ Tampoco deben mezclarse con el primer ensayo local basado en la copia de main.
   CSV limpio usando el año contrastado, que ya era correcto en las entradas.
 - Se añaden al informe dos aciertos y dos errores reales de la prueba,
   extraídos automáticamente de las predicciones de la semilla 42.
-- Se completa la guía con cifras, guion para los cuatro y explicación pausada
-  para Dylan. Se prepara `ANTES_DE_PRESENTAR.md` para el ensayo y la entrega.
-- Se añade `EXPLICACION_COMPLETA.md` y un repaso interactivo de 25 capítulos
-  en `repaso_proyecto.html`, con controles de reproducción y lectura opcional.
+- Se completa la guía con cifras y guion para los cuatro. Se prepara
+  `ANTES_DE_PRESENTAR.md` para el ensayo y la entrega.
 - La primera revisión está subida en `2f5399d`. Su ejecución de Actions hizo
   correctamente EDA, entrenamiento y render, con las mismas métricas finales
   que en local; el despliegue quedó bloqueado por la política de `github-pages`.

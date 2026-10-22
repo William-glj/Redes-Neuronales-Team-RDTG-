@@ -8,11 +8,7 @@ incrustados. No necesita instalar Python ni ejecutar entrenamientos para leerlo.
 El archivo `_site/index.html` es la salida del último render; después de
 regenerarlo hay que actualizar la copia `presentacion.html`.
 
-Para preparar las intervenciones, abrir `GUIA_EXPOSICION.md`. Dylan tiene una
-explicación más pausada en `EXPLICACION_DYLAN.md`.
-`EXPLICACION_COMPLETA.md` recorre todo el proyecto desde cero. Para estudiar
-con explicaciones visuales, abrir `repaso_proyecto.html` en el navegador y
-pulsar **Reproducir**. El menú permite ir directamente a cada capítulo.
+Para preparar las intervenciones, abrir `GUIA_EXPOSICION.md`.
 
 ## Esta tarde
 
@@ -33,7 +29,7 @@ por las reglas del entorno `github-pages`, que solo admiten `gh-pages`.
 Un administrador del repositorio debe seleccionar GitHub Actions como fuente
 de Pages y permitir `desarrollo` en el entorno `github-pages`.
 La cuenta colaboradora consultada tiene WRITE; esos ajustes requieren administración.
-Esta revisión incluye la fuente contrastada, las fechas corregidas y el material de repaso.
+Esta revisión incluye la fuente contrastada, las fechas corregidas y los ejemplos de predicciones.
 
 Después de completar el despliegue de esta revisión, abrir la web desde
 otro dispositivo y verificar que aparece la fuente de Kaggle contrastada,

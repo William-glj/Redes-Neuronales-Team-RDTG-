@@ -6,13 +6,7 @@ Equipo: José Ramón, Guillermo, Dylan y Tomás. 2.º DAW.
 
 1. Abrir `presentacion.html`: informe completo con recursos incrustados, para leerlo sin ejecutar Python.
 2. Repartir `GUIA_EXPOSICION.md`: incluye resultados concretos, ejemplos y guion para los cuatro.
-3. Dylan puede estudiar `EXPLICACION_DYLAN.md` para entender la red y el bucle paso a paso.
-4. Revisar `ANTES_DE_PRESENTAR.md`: ensayo, apertura local y publicación pendiente.
-5. Leer `EXPLICACION_COMPLETA.md` para entender el recorrido desde cero.
-6. Abrir `repaso_proyecto.html` con Chrome, Edge o Safari y pulsar **Reproducir**.
-   Incluye 25 capítulos, explicaciones visuales y el guion completo. La opción
-   **Leer con voz** depende de las voces disponibles en el navegador; el texto
-   y las imágenes funcionan sin conexión. Es un repaso interactivo en HTML.
+3. Revisar `ANTES_DE_PRESENTAR.md`: ensayo, apertura local y publicación pendiente.
 
 ## Estado de esta versión
 
@@ -108,9 +102,6 @@ EDA, entrenamiento y render en ese orden.
 | `resultados/` | Tablas, divisiones, predicciones, curvas numéricas y pesos entrenados. |
 | `graficos/` | Imágenes generadas con matplotlib. |
 | `GUIA_EXPOSICION.md` | Reparto, explicación del código y preguntas de defensa. |
-| `EXPLICACION_DYLAN.md` | Explicación pausada de la red y el entrenamiento. |
-| `EXPLICACION_COMPLETA.md` | Guía de todo el proyecto desde cero, con resultados y preguntas. |
-| `repaso_proyecto.html` | Repaso visual con reproducción, pausa y selección de capítulos. |
 | `ANTES_DE_PRESENTAR.md` | Preparación local, ensayo y pasos de entrega pendientes. |
 | `Ejecutar_en_Colab.ipynb` | Alternativa de ejecución, después de subir esta versión al repo. |
 

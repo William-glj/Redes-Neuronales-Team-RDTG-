@@ -11,9 +11,8 @@
 - [x] Generar el informe Quarto y la guía oral para cuatro personas.
 - [x] Contrastar una fuente pública, reproducir la selección y las etiquetas, y documentar sus límites.
 - [x] Corregir 12 fechas con el siglo incorrecto en el CSV limpio.
-- [x] Completar guion oral, ejemplos reales y explicación de PyTorch para Dylan.
+- [x] Completar guion oral y ejemplos reales para la exposición.
 - [x] Subir la primera revisión a `desarrollo` (commit `2f5399d`).
-- [x] Preparar la explicación completa y el repaso interactivo para estudiar.
 - [x] Subir la revisión final a `desarrollo`.
 - [ ] Revisar y comprender el trabajo entre los cuatro.
 - [ ] Permitir el despliegue de `desarrollo` y comprobar la web publicada.
