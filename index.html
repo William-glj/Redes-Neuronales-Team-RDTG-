@@ -4906,7 +4906,12 @@ window.Quarto = {
   <li><a href="#análisis-e-interpretación-de-resultados" id="toc-análisis-e-interpretación-de-resultados" class="nav-link" data-scroll-target="#análisis-e-interpretación-de-resultados">3.3. Análisis e Interpretación de Resultados</a></li>
   <li><a href="#evaluación-final-sobre-el-conjunto-de-prueba" id="toc-evaluación-final-sobre-el-conjunto-de-prueba" class="nav-link" data-scroll-target="#evaluación-final-sobre-el-conjunto-de-prueba">3.4. Evaluación Final sobre el Conjunto de Prueba</a></li>
   </ul></li>
-  <li><a href="#limitaciones-reproducción-y-referencias" id="toc-limitaciones-reproducción-y-referencias" class="nav-link" data-scroll-target="#limitaciones-reproducción-y-referencias">4. Limitaciones, reproducción y referencias</a></li>
+  <li><a href="#limitaciones-reproducción-y-trabajo-futuro" id="toc-limitaciones-reproducción-y-trabajo-futuro" class="nav-link" data-scroll-target="#limitaciones-reproducción-y-trabajo-futuro">4. Limitaciones, Reproducción y Trabajo Futuro</a>
+  <ul class="collapse">
+  <li><a href="#análisis-crítico-y-viabilidad-real" id="toc-análisis-crítico-y-viabilidad-real" class="nav-link" data-scroll-target="#análisis-crítico-y-viabilidad-real">4.1. Análisis Crítico y Viabilidad Real</a></li>
+  <li><a href="#rigor-metodológico-y-líneas-de-mejora" id="toc-rigor-metodológico-y-líneas-de-mejora" class="nav-link" data-scroll-target="#rigor-metodológico-y-líneas-de-mejora">4.2. Rigor Metodológico y Líneas de Mejora</a></li>
+  <li><a href="#extras" id="toc-extras" class="nav-link" data-scroll-target="#extras">Extras</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -5892,10 +5897,52 @@ Lotes de mayor tamaño (<code>Batch Size = 64</code> en <strong><code>Exp_5</cod
 <p>El modelo final alcanza una <strong>precisión en prueba del 67.53%</strong>, superando en casi <strong>4 puntos porcentuales</strong> a la Regresión Logística y demostrando la capacidad de la red neuronal para aprender patrones no lineales eficaces a partir de las variables de entrada.</p>
 </section>
 </section>
-<section id="limitaciones-reproducción-y-referencias" class="level2">
-<h2 class="anchored" data-anchor-id="limitaciones-reproducción-y-referencias">4. Limitaciones, reproducción y referencias</h2>
-<p>La muestra recibida tiene películas de 1961 a 2015 y procede de una selección de casos completos. Las cinco entradas no recogen todos los factores relacionados con la popularidad. Las categorías ya venían definidas antes de la separación y son relativas a esa selección. Votos y nota media son posteriores al estreno y están relacionados con el indicador de popularidad.</p>
-<p>Utilizamos una sola partición y tres inicializaciones. La diferencia frente a otro modelo se refiere a esta prueba; no es una garantía para otras películas. Como mejoras futuras proponemos más datos, otras variables y comparar varias particiones, conservando una evaluación final independiente.</p>
+<section id="limitaciones-reproducción-y-trabajo-futuro" class="level2">
+<h2 class="anchored" data-anchor-id="limitaciones-reproducción-y-trabajo-futuro">4. Limitaciones, Reproducción y Trabajo Futuro</h2>
+<p>El modelo desarrollado debe entenderse como una <strong>prueba de concepto académica</strong> y no como un sistema listo para entornos de producción. Aunque la red neuronal superó a las <em>baselines</em> lineales en la muestra analizada (películas de 1961 a 2015), el alcance del proyecto está acotado por la naturaleza de los datos y el uso de variables generadas únicamente tras el lanzamiento comercial (<code>vote_count</code> y <code>vote_average</code>).</p>
+<p>Para garantizar un rigor analítico completo, se detallan las limitaciones metodológicas, la viabilidad en la industria real y las líneas de desarrollo futuro.</p>
+<hr>
+<section id="análisis-crítico-y-viabilidad-real" class="level3">
+<h3 class="anchored" data-anchor-id="análisis-crítico-y-viabilidad-real">4.1. Análisis Crítico y Viabilidad Real</h3>
+<ul>
+<li><strong>Muestra reducida y sesgada:</strong> El conjunto de datos es histórico (1961-2015) y previamente filtrado. No representa la totalidad de la oferta cinematográfica global ni los patrones de consumo actuales.</li>
+<li><strong>Trazabilidad y etiquetas heredadas:</strong> Aunque se verificó una fuente pública equivalente y se reprodujeron las etiquetas, el análisis está condicionado por la selección original de casos y sus criterios de categorización.</li>
+<li><strong>Fuga de información (<em>Data Leakage</em>):</strong> El uso de métricas posteriores al estreno impide que la red funcione como un predictor previo al rodaje para guiar decisiones de inversión financiera.</li>
+<li><strong>Filtro comercial restrictivo:</strong> El umbral de presupuesto mínimo ($10.000) excluye producciones independientes válidas, limitando la extrapolación de los resultados a proyectos de bajo presupuesto.</li>
+<li><strong>Evaluación en partición única:</strong> Evaluar sobre una sola división de datos acota la generalización estadística. Las tres inicializaciones empleadas mitigan la variabilidad de los pesos, pero no sustituyen una validación cruzada sistemática.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Brecha para Entornos de Producción
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A día de hoy, el modelo ignora cerca del <strong>80% de los factores determinantes</strong> en la industria cinematográfica actual:</p>
+<ul>
+<li><strong>Reparto y Dirección:</strong> Carece de métricas sobre el tirón mediático o historial de actores y directores.</li>
+<li><strong>Propiedad Intelectual (IP):</strong> No distingue si un título pertenece a un universo o franquicia consolidada (ej. Marvel, Star Wars) o si es una idea original.</li>
+<li><strong>Impacto en Redes y Marketing:</strong> No contempla el presupuesto publicitario ni la conversación en redes sociales previa al estreno.</li>
+</ul>
+</div>
+</div>
+<hr>
+</section>
+<section id="rigor-metodológico-y-líneas-de-mejora" class="level3">
+<h3 class="anchored" data-anchor-id="rigor-metodológico-y-líneas-de-mejora">4.2. Rigor Metodológico y Líneas de Mejora</h3>
+<ul>
+<li><strong>Garantía de preprocesado ciego:</strong> Para evitar contaminación de datos, el análisis exploratorio (EDA) describe la muestra completa, pero todos los parámetros de normalización y escalado se ajustaron exclusivamente sobre el conjunto de entrenamiento. La prueba final se mantuvo totalmente inédita hasta la evaluación definitiva.</li>
+<li><strong>Validación Cruzada y Divisibilidad Temporal:</strong> Implementar un esquema de <em>K-Fold Cross-Validation</em> junto con una separación por corte temporal (<em>Temporal Split</em>) para medir la capacidad de la red al predecir películas de épocas posteriores a su entrenamiento.</li>
+<li><strong>Aislamiento de Variables Pre-estreno:</strong> Estudiar el impacto de eliminar el número de votos y la calificación media, comparando el rendimiento del modelo post-estreno actual con una arquitectura basada estrictamente en variables previas al rodaje. ## 5. Alcance y Conclusiones propias</li>
+</ul>
+<p><strong>¿Se acerca más a los aciertos o a los errores?</strong> Al analizar los resultados, vemos que el modelo funciona muy bien identificando los casos extremos, logrando más de un 83% de F1-Score en la categoría de alta popularidad y reconociendo los grandes fracasos sin problema. Sin embargo, tiene un punto ciego claro en la zona media, ya que se equivoca en casi la mitad de los casos de popularidad media o media-alta al confundirlos sistemáticamente con la categoría baja. La red acierta fácilmente en lo más evidente (los taquillazos o los fracasos estrepitosos), pero duda bastante a la hora de clasificar el cine de rango intermedio.</p>
+<p><strong>¿Es realmente útil?</strong> A nivel práctico, el modelo presenta una limitación lógica clave: al incluir variables como la nota media y el número de votos, que solo existen tras el lanzamiento, no sirve para predecir el éxito a priori ni ayuda a un estudio a decidir si financiar un proyecto antes de rodar. Sin embargo, su utilidad real se encuentra en la etapa posterior al estreno, siendo una herramienta muy práctica para que plataformas como Netflix o Prime Video automaticen la organización y segmentación de grandes catálogos de películas en función de la recepción final del público.</p>
+</section>
+<section id="extras" class="level3">
+<h3 class="anchored" data-anchor-id="extras">Extras</h3>
 <p>El código completo está en los cuatro scripts del grupo. Para reproducir los resultados, ejecutar desde <code>redes neuronales</code>:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> EDA.py</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> preparacion_datos_entrenamiento.py</span>
@@ -5907,6 +5954,7 @@ Lotes de mayor tamaño (<code>Batch Size = 64</code> en <strong><code>Exp_5</cod
 <p><strong>Herramientas:</strong> <a href="https://pytorch.org/">PyTorch</a>, <a href="https://pandas.pydata.org/">pandas</a>, <a href="https://numpy.org/">NumPy</a>, <a href="https://matplotlib.org/">Matplotlib</a>, <a href="https://scikit-learn.org/">scikit-learn</a> y <a href="https://quarto.org/">Quarto</a>.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
