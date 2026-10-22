@@ -1,0 +1,152 @@
+## Modelo inicial del equipo
+
+Conservamos el planteamiento de `preparacion_datos_entrenamiento.py`: cinco
+entradas, dos capas ocultas de 64 neuronas, lote 32, Adam con tasa 0,01 y
+10 épocas. Con las correcciones y la nueva separación de datos, la accuracy
+de validación es **60.7%** y el F1 macro de
+validación es **0.607**.
+
+![Pérdida del modelo inicial calculada durante la ejecución, sin valores escritos a mano.](graficos/baseline.png)
+
+Las cifras anteriores del informe de desarrollo correspondían a otro reparto
+de datos y no se comparan directamente con estas. Este modelo inicial se mide
+solo en validación; reservamos prueba para la configuración elegida después.
+
+## Comparación de configuraciones
+
+La partición contiene **893 películas de entrenamiento**,
+**191 de validación** y **192 de prueba**.
+Hay **5 variables de entrada**. Entrenamos **8
+configuraciones** con tres semillas cada una: **24 entrenamientos**,
+además del modelo inicial. Los datos
+asignados a cada conjunto son siempre los mismos.
+
+| Prueba | Neuronas ocultas | Lote | LR | Parámetros | Accuracy val. | F1 macro val. | Desv. F1 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Exp_2 | 64-32 | 32 | 0.01 | 2596 | 0.637 | 0.6329 | 0.0099 |
+| Exp_5 | 64-32 | 64 | 0.01 | 2596 | 0.623 | 0.6242 | 0.014 |
+| Exp_4 | 64-32 | 16 | 0.01 | 2596 | 0.6143 | 0.6182 | 0.0133 |
+| Exp_8 | 64 | 32 | 0.01 | 644 | 0.6126 | 0.6153 | 0.0055 |
+| Exp_6 | 64-32 | 32 | 0.001 | 2596 | 0.6091 | 0.6104 | 0.0189 |
+| Exp_1 | 32 | 32 | 0.01 | 324 | 0.6108 | 0.6098 | 0.0064 |
+| Exp_3 | 128-64-32 | 32 | 0.01 | 11236 | 0.6073 | 0.5944 | 0.004 |
+| Exp_7 | 64-32 | 32 | 0.0001 | 2596 | 0.4747 | 0.3727 | 0.0692 |
+
+
+![F1 macro de validación. Las barras muestran la desviación entre tres inicializaciones.](graficos/comparacion.png)
+
+Elegimos **Exp_2**, con capas ocultas **[64, 32]**, lote
+**32** y tasa de aprendizaje **0.01**, porque tiene el
+mayor F1 macro medio en validación. Si hay empate, preferimos la menor
+desviación. Dentro de cada entrenamiento recuperamos la época de menor
+pérdida de validación; no usamos la última época automáticamente.
+
+Exp_1 frente a Exp_8 cambia las neuronas de una capa. Exp_8 frente a Exp_2
+añade una segunda capa manteniendo 64 neuronas en la primera. Exp_2 frente a
+Exp_3 cambia profundidad y anchura a la vez, por lo que no aislamos sus efectos.
+Exp_4 y Exp_5 cambian solo el lote respecto a Exp_2. Exp_6 y Exp_7 cambian
+solo la tasa de aprendizaje respecto a Exp_2.
+
+La ventaja de Exp_2 respecto a Exp_5 es de solo
+**0.0087 de F1 macro**. Las desviaciones entre semillas son
+**0.0099** y **0.0140**,
+respectivamente. La elección cumple nuestro criterio; tres inicializaciones
+sobre una muestra no demuestran una superioridad general.
+
+En los cambios controlados, pasar de Exp_1 a Exp_8 cambia el F1 medio en
+**+0.005**; de Exp_8 a Exp_2, en
+**+0.018**; reducir el lote de Exp_2 a Exp_4,
+en **-0.015**; aumentar el lote de Exp_2
+a Exp_5, en **-0.009**; y reducir la tasa de
+aprendizaje de Exp_2 a Exp_6, en **-0.022**.
+Son diferencias descriptivas de este ensayo, con variabilidad entre semillas.
+
+Exp_7, con tasa 0,0001, obtiene un F1 medio de validación de
+**0.373** dentro del límite de 15 épocas. Su peor resultado
+es compatible con un aprendizaje más lento: no demuestra que esa tasa sea mala
+si se permite más entrenamiento. La red más profunda, Exp_3, obtiene
+**0.594**, por lo que aumentar capas y neuronas tampoco
+garantiza mejorar en este ensayo.
+
+
+## Curvas de aprendizaje
+
+![Pérdida y accuracy durante las 15 épocas de la configuración elegida.](graficos/aprendizaje.png)
+
+La curva corresponde a la semilla 42, fijada de antemano. Si la pérdida de
+entrenamiento baja mientras la de validación sube, hay indicios de
+sobreajuste. Las curvas muestran todas las épocas, aunque recuperamos el
+estado de menor pérdida de validación.
+
+![Comparación de las pérdidas de tres configuraciones, manteniendo la semilla 42.](graficos/sobreajuste.png)
+
+Estas curvas permiten ver si una mayor complejidad o un aprendizaje más rápido
+reducen la pérdida de entrenamiento sin mejorar validación. Se muestran todas
+las épocas, pero las métricas comparadas corresponden a los pesos recuperados
+por validación. Las curvas no justifican elegir una red por su acierto de
+entrenamiento.
+
+## Evaluación final en prueba
+
+Consultamos prueba después de elegir la configuración. Para las tres semillas,
+la accuracy media es **60.9%** y el F1 macro
+medio es **0.603 ± 0.002**.
+La desviación resume tres inicializaciones sobre UNA partición; no es un
+intervalo de confianza ni mide la variación entre distintas muestras.
+
+El F1 medio de validación de la configuración elegida es
+**0.633**. Su descenso hasta
+**0.603** en prueba muestra que la estimación de
+validación fue más favorable. La muestra reservada es pequeña y la selección
+entre configuraciones también puede favorecer resultados optimistas en
+validación. No retocamos el modelo tras observar esta prueba.
+
+| semilla | accuracy | f1_macro |
+| --- | --- | --- |
+| 42 | 0.6094 | 0.6035 |
+| 7 | 0.6042 | 0.6006 |
+| 21 | 0.6146 | 0.6039 |
+
+
+Para la matriz y los ejemplos usamos siempre la semilla 42: accuracy
+**60.9%** y F1 macro **0.603**.
+
+![La diagonal contiene los aciertos; fuera de ella están los errores.](graficos/matriz_confusion.png)
+
+El error más frecuente de la matriz es confundir **Media** con **Baja**, en **15 películas**. Esto describe el error; la matriz no demuestra su causa.
+
+| Categoría | precision | recall | f1-score | support |
+| --- | --- | --- | --- | --- |
+| Baja | 0.6154 | 0.6809 | 0.6465 | 47.0 |
+| Media | 0.4565 | 0.4375 | 0.4468 | 48.0 |
+| Media-alta | 0.5238 | 0.4583 | 0.4889 | 48.0 |
+| Alta | 0.8077 | 0.8571 | 0.8317 | 49.0 |
+
+
+## Comparación con referencias sencillas
+
+La clase mayoritaria se decide usando entrenamiento. La regresión logística
+usa las mismas entradas normalizadas y es un clasificador, a pesar de su
+nombre. No hemos ajustado sus hiperparámetros. Estas referencias ayudan a
+valorar si la red aporta algo frente a soluciones menos complejas.
+
+| modelo | accuracy_validacion | f1_validacion | accuracy_prueba | f1_prueba |
+| --- | --- | --- | --- | --- |
+| Clase mayoritaria | 0.2513 | 0.1004 | 0.25 | 0.1 |
+| Regresión logística | 0.623 | 0.6232 | 0.5885 | 0.588 |
+
+
+## Conclusiones de los resultados
+
+1. **Exp_2** es la configuración seleccionada por validación en este ensayo.
+   Eso no implica que sea la mejor red para cualquier dataset.
+2. La red obtiene un F1 macro medio 0.015 superior al de la regresión logística en esta partición. Es una diferencia observada, no una prueba de superioridad general ni de significación estadística.
+3. La accuracy mide la proporción de aciertos. El F1 macro combina precisión
+   y exhaustividad y da el mismo peso a cada categoría. Por eso lo utilizamos
+   como criterio de comparación.
+4. Tres semillas ayudan a comprobar la sensibilidad a la inicialización.
+   Para conclusiones más sólidas harían falta otras particiones y más datos.
+
+Los CSV detallados, las predicciones, los parámetros de normalización y los
+pesos se guardan en `resultados/`. Las versiones utilizadas son:
+`{'python': '3.14.3', 'torch': '2.14.1', 'numpy': '2.5.4', 'pandas': '2.3.3'}`.

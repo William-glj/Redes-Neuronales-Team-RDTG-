@@ -1,0 +1,66 @@
+name: Informe de redes neuronales
+
+on:
+  push:
+    branches: [desarrollo]
+    paths:
+      - 'redes neuronales/**'
+      - '.github/workflows/informe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  generar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: 'redes neuronales/requirements.txt'
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -r "redes neuronales/requirements.txt"
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - name: Analizar, entrenar y generar el informe
+        working-directory: redes neuronales
+        run: |
+          python EDA.py
+          python preparacion_hiperparametros_modulares.py
+          quarto render
+      - name: Guardar resultados descargables
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-redes-neuronales
+          path: |
+            redes neuronales/resultados/
+            redes neuronales/graficos/
+            redes neuronales/datos/peliculas_limpias.csv
+          if-no-files-found: error
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: 'redes neuronales/_site'
+
+  publicar:
+    needs: generar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - name: Publicar GitHub Pages
+        id: despliegue
+        uses: actions/deploy-pages@v4

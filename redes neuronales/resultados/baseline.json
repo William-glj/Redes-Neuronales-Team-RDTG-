@@ -1,0 +1,11 @@
+{
+  "epocas": 10,
+  "capas": [
+    64,
+    64
+  ],
+  "batch": 32,
+  "lr": 0.01,
+  "accuracy_validacion": 0.6073298454284668,
+  "f1_validacion": 0.6073572177621896
+}

@@ -1,0 +1,18 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - presentacion.qmd
+website:
+  title: "Cine y redes neuronales · RDTG"
+format:
+  html:
+    theme:
+      - cosmo
+      - estilos.scss
+    lang: es
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    code-copy: true
+    embed-resources: true

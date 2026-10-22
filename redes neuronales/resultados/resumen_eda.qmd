@@ -1,0 +1,76 @@
+Partimos de **1287 películas** y **24 columnas**, contando
+el índice exportado. Hay **0 identificadores duplicados** y
+**1 película sin una categoría válida**. Eliminamos esa fila para
+no inventar su respuesta. Conservamos **1276 películas**.
+
+Conservamos la selección de la rama `desarrollo`: presupuesto y recaudación
+superiores a 10.000. El filtro excluye **10 películas**. Es una
+delimitación de la muestra comercial, no una prueba de que los importes bajos
+sean erróneos: también excluye películas independientes que pueden ser válidas.
+Esto limita la representatividad y no garantiza que los importes restantes
+sean correctos. La eliminación de la categoría ausente es un paso adicional.
+
+No se han imputado medianas con toda la muestra. La preparación posterior
+calcula las medianas y la normalización únicamente con entrenamiento.
+
+### Valores nulos en el archivo recibido
+
+| variable | tipo | nulos |
+| --- | --- | --- |
+| id | int64 | 0 |
+| imdb_id | object | 0 |
+| popularity | float64 | 0 |
+| budget | float64 | 0 |
+| revenue | float64 | 0 |
+| original_title | object | 0 |
+| cast | object | 0 |
+| homepage | object | 0 |
+| director | object | 0 |
+| tagline | object | 0 |
+| keywords | object | 0 |
+| overview | object | 0 |
+| runtime | int64 | 0 |
+| genres | object | 0 |
+| production_companies | object | 0 |
+| release_date | object | 0 |
+| vote_count | int64 | 0 |
+| vote_average | float64 | 0 |
+| release_year | int64 | 0 |
+| budget_adj | float64 | 0 |
+| revenue_adj | float64 | 0 |
+| profit | float64 | 0 |
+| popularity_level | object | 1 |
+
+
+### Distribución de las clases
+
+| categoria | peliculas |
+| --- | --- |
+| Baja | 314 |
+| Media | 319 |
+| Media-alta | 321 |
+| Alta | 322 |
+
+
+### Valores extremos
+
+El criterio IQR señala valores por debajo de Q1 − 1,5 × IQR o por encima de
+Q3 + 1,5 × IQR. Señalar un valor no demuestra que sea un error.
+
+| variable | atipicos |
+| --- | --- |
+| budget | 82 |
+| revenue | 120 |
+| runtime | 29 |
+| vote_count | 122 |
+| vote_average | 13 |
+| release_year | 90 |
+| popularity | 98 |
+
+
+Conservamos estos extremos. Aplicamos `np.log1p` a presupuesto y
+número de votos antes de normalizar las cinco entradas originales. Así reducimos las diferencias de escala
+sin borrar automáticamente las películas con cifras elevadas. La duración,
+la nota y el año solo se normalizan. La recaudación se estudia en el EDA y no entra
+al modelo. `popularity` se estudia en el EDA, pero
+**no se utiliza como entrada del modelo**.
