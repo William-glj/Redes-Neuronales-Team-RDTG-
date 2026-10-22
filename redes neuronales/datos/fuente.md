@@ -12,7 +12,7 @@
 
 El archivo recibido por el equipo se llamaba `TMBD Movie Dataset.csv` y ya
 estaba en la rama `desarrollo`, revisión `0857c4b`. Se conserva sin cambiar
-sus bytes en `peliculas_original.csv` y en `originales/desarrollo/`.
+sus bytes como `TMBD Movie Dataset.csv` dentro de `redes neuronales`.
 Tiene 1.287 películas y 24 columnas contando el índice exportado.
 
 ## Qué se ha comprobado
@@ -36,7 +36,7 @@ Se han contrastado las 21 columnas de la fuente, con estas diferencias documenta
   se reproducen con `pd.cut` usando mínimo, cuartiles y máximo de la
   popularidad de las 1.287 películas. El mínimo queda fuera del primer
   intervalo si no se usa `include_lowest=True`. Conservamos las etiquetas
-  recibidas y eliminamos la fila sin etiqueta; no cambiamos los resultados.
+  recibidas y eliminamos la fila sin etiqueta.
 
 Los cortes reproducidos son: 0,010335; 0,6647835; 1,152354; 2,1253415; 32,985763.
 Son cortes de esta selección histórica, no umbrales oficiales de TMDB.

@@ -1,296 +1,183 @@
-"""Actualiza el fragmento del informe con métricas reales y sus figuras."""
-
+"""Genera tablas y figuras del informe a partir de las ejecuciones guardadas."""
+from pathlib import Path
 import json
+import os
+import tempfile
 import numpy as np
 import pandas as pd
-from EDA import CARPETA, CATEGORIAS, NOMBRES, tabla_markdown
+os.environ.setdefault('MPLCONFIGDIR', str(Path(tempfile.gettempdir()) / 'rdtg-matplotlib'))
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+CARPETA = Path(__file__).resolve().parent
+RESULTADOS = CARPETA / 'resultados'
+GRAFICOS = CARPETA / 'graficos'
 
 
-def generar_resultados():
-    carpeta = CARPETA / "resultados"
-    destino = carpeta / "resultados_modelos.qmd"
-    if not (carpeta / "resumen_modelo.json").exists():
-        destino.write_text("""::: {.callout-warning}
-## Entrenamiento pendiente
-Todavía no hay métricas de las redes. Este documento es un borrador y no es la
-entrega final. Ejecutar `python EDA.py` y `python preparacion_hiperparametros_modulares.py`, y volver
-a generar el HTML con `quarto render`.
-:::
-""", encoding="utf-8")
-        return
+def tabla(datos):
+    columnas = [str(c) for c in datos.columns]
+    lineas = ['| ' + ' | '.join(columnas) + ' |', '| ' + ' | '.join(['---'] * len(columnas)) + ' |']
+    for fila in datos.itertuples(index=False, name=None):
+        valores = [str(v).replace('|', ' / ').replace('\n', ' ') for v in fila]
+        lineas.append('| ' + ' | '.join(valores) + ' |')
+    return '\n'.join(lineas)
 
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    resumen = json.loads((carpeta / "resumen_modelo.json").read_text(encoding="utf-8"))
-    comparacion = pd.read_csv(carpeta / "comparacion.csv")
-    referencias = pd.read_csv(carpeta / "referencias.csv")
-    prueba = pd.read_csv(carpeta / "prueba_semillas.csv")
-    ganador = resumen["experimento_elegido"]
-    tabla = comparacion[["experimento", "capas", "batch", "lr", "parametros",
-                         "accuracy_validacion", "f1_validacion", "f1_desviacion"]].copy()
-    tabla.columns = ["Prueba", "Neuronas ocultas", "Lote", "LR", "Parámetros",
-                     "Accuracy val.", "F1 macro val.", "Desv. F1"]
-    tabla = tabla.round(4)
-    referencias = referencias.round(4)
-    historial = pd.read_csv(carpeta / f"historial_{ganador}_42.csv")
-    matriz = pd.read_csv(carpeta / "matriz_confusion.csv", index_col=0)
-    graficos = CARPETA / "graficos"
-    graficos.mkdir(exist_ok=True)
 
-    fig, ax = plt.subplots(figsize=(8, 4.5))
-    orden = comparacion.sort_values("experimento")
-    ax.bar(orden["experimento"], orden["f1_validacion"],
-           yerr=orden["f1_desviacion"], capsize=5, color="#2878a0")
-    ax.set(ylim=(0, 1), title="Comparación en validación", ylabel="F1 macro medio ± desviación")
+def guardar(nombre, texto):
+    (RESULTADOS / (nombre + '.qmd')).write_text(texto.rstrip() + '\n', encoding='utf-8')
+
+
+def generar():
+    datos = pd.read_csv(CARPETA / 'IMBD_Movie_Dataset_limpio.csv')
+    original = pd.read_csv(CARPETA / 'TMBD Movie Dataset.csv')
+    resumen = json.loads((RESULTADOS / 'resumen_modelo.json').read_text())
+    baseline = json.loads((RESULTADOS / 'baseline.json').read_text())
+    comparacion = pd.read_csv(RESULTADOS / 'comparacion.csv')
+    historial = pd.read_csv(RESULTADOS / 'historial_baseline.csv')
+    metricas = pd.read_csv(RESULTADOS / 'metricas_baseline.csv', index_col=0)
+    clases = resumen['clases']
+
+    guardar('muestra', tabla(datos[['id', 'original_title', 'release_date', 'budget', 'revenue', 'runtime']].head(4)))
+    estadisticas = datos[['budget', 'revenue', 'runtime']].describe().round(2).reset_index()
+    guardar('estadisticas', tabla(estadisticas))
+    nulos = original.isna().sum().rename('Nulos recibidos').reset_index()
+    nulos.columns = ['Columna', 'Nulos recibidos']
+    atipicos = pd.read_csv(RESULTADOS / 'atipicos.csv')
+    guardar('diagnostico', '#### Valores nulos\n\n' + tabla(nulos) + '\n\n#### Valores atípicos\n\n' + tabla(atipicos))
+    conteos = datos['popularity_level'].value_counts().reindex(['Low', 'Medium', 'Moderately High', 'High'])
+    guardar('limpieza', f'Partimos de **{len(original)} películas** y quedan **{len(datos)}**: '
+            'se excluyen diez por el filtro comercial y una sin categoría. '
+            'No se encontraron duplicados por ID. Se corrigen doce fechas con el siglo incorrecto, '
+            'conservando el año de estreno ya contrastado.\n\n' + tabla(conteos.rename('Películas').reset_index()))
+
+    guardar('resumen_baseline', f'::: {{.callout-note}}\n**Resumen de Datos**\n\n'
+            f'- Registros de entrenamiento: **{baseline["entrenamiento"]}**.\n'
+            f'- Registros de validación: **{baseline["validacion"]}**.\n'
+            f'- Registros de prueba reservados: **{resumen["prueba"]}**.\n'
+            f'- Épocas del modelo inicial: **{baseline["epocas"]}**.\n'
+            f'- Accuracy final en validación: **{baseline["accuracy_validacion"] * 100:.2f} %**.\n:::\n\n'
+            'Las cifras siguientes se generan desde los CSV de esta ejecución. No corresponden a la antigua partición 80/20.')
+    guardar('historial_baseline', tabla(historial.round(4)))
+    guardar('metricas_baseline', tabla(metricas.drop(index='accuracy').round(3).reset_index().rename(columns={'index': 'Clase'})))
+    guardar('comparacion', tabla(comparacion.round(4)) + '\n\nLas pérdidas, accuracy y tiempos son medias de las semillas 42, 7 y 21. '
+            'La desviación se expresa en puntos porcentuales de accuracy. El tiempo depende del equipo.')
+
+    primero = comparacion.iloc[0]
+    segundo = comparacion.iloc[1]
+    configuraciones = comparacion.set_index('ID')
+    conclusiones = f'''La mejor configuración según el criterio fijado es **{primero['ID']}**: capas ocultas
+**{primero['Capas Ocultas']}**, lote **{int(primero['Batch Size'])}** y tasa de aprendizaje
+**{primero['Learning Rate']}**. Su accuracy media de validación es **{primero['Val Accuracy (%)']:.2f} %**.
+Se selecciona con validación; no se utiliza prueba para escogerla.
+
+1. **Tamaño del lote:** Exp_2, Exp_4 y Exp_5 mantienen la red [64, 32] y la tasa 0,01.
+   Sus accuracies medias son {configuraciones.loc['Exp_2', 'Val Accuracy (%)']:.2f} %, {configuraciones.loc['Exp_4', 'Val Accuracy (%)']:.2f} % y {configuraciones.loc['Exp_5', 'Val Accuracy (%)']:.2f} %.
+   La comparación describe estos experimentos; no demuestra una causa universal del resultado.
+2. **Tasa de aprendizaje:** Exp_2, Exp_6 y Exp_7 usan la misma arquitectura y lote.
+   Con tasa 0,0001, Exp_7 obtiene {configuraciones.loc['Exp_7', 'Val Accuracy (%)']:.2f} %.
+   Con quince épocas puede necesitar más entrenamiento; no significa que esa tasa nunca funcione.
+3. **Profundidad y neuronas:** las redes [32], [64, 32] y [128, 64, 32] cambian capas y anchura.
+   No aislamos el efecto de cada cambio. La red mayor consigue {configuraciones.loc['Exp_3', 'Val Accuracy (%)']:.2f} %.
+   Más neuronas no garantizan más aciertos. Para estudiar sobreajuste miramos las curvas completas.
+
+La diferencia entre {primero['ID']} y {segundo['ID']} es de **{primero['Val Accuracy (%)'] - segundo['Val Accuracy (%)']:.2f} puntos**.
+La desviación de {primero['ID']} entre semillas es **{primero['Desviación accuracy']:.2f} puntos**.
+Tres repeticiones ayudan a ver variación, pero no demuestran significación estadística.
+'''
+    guardar('conclusiones', conclusiones)
+    pruebas = pd.read_csv(RESULTADOS / 'prueba_semillas.csv')
+    referencias = pd.read_csv(RESULTADOS / 'referencias.csv')
+    metricas_prueba = pd.read_csv(RESULTADOS / 'metricas_prueba.csv', index_col=0)
+    predicciones = pd.read_csv(RESULTADOS / 'predicciones_prueba.csv')
+    ejemplos = pd.concat([predicciones[predicciones['Acierto']].head(2), predicciones[~predicciones['Acierto']].head(2)])
+    ejemplos = ejemplos[['original_title', 'popularity_level', 'Predicción', 'Acierto']]
+    ejemplos.to_csv(RESULTADOS / 'ejemplos.csv', index=False)
+    logistica = referencias.loc[referencias['Modelo'] == 'Regresión logística', 'Accuracy prueba (%)'].iloc[0]
+    diferencia = resumen['accuracy_prueba_media'] * 100 - logistica
+    principal = pruebas.loc[pruebas['Semilla'] == 42].iloc[0]
+    guardar('prueba', f'''La configuración ya elegida obtiene **{resumen['accuracy_prueba_media'] * 100:.2f} % de accuracy medio en prueba**
+y **F1 macro {resumen['f1_prueba_medio']:.3f}**, promediando las tres semillas.
+Accuracy es aciertos divididos entre películas. F1 macro combina precisión y recall y promedia las cuatro clases con igual peso.
+
+{tabla(pruebas.round(4))}
+
+La matriz usa la semilla 42, fijada de antemano: **{round(principal['Accuracy'] * resumen['prueba'])} aciertos de {resumen['prueba']} películas**.
+Las filas son las categorías reales y las columnas las predichas; la diagonal representa aciertos.
+
+![Matriz de confusión de prueba, semilla 42.](graficos/matriz_confusion.png)
+
+{tabla(metricas_prueba.drop(index='accuracy').round(3).reset_index().rename(columns={'index': 'Clase'}))}
+
+#### Comparación con referencias sencillas
+
+{tabla(referencias.round(2))}
+
+La diferencia de la red frente a la logística es de **{diferencia:.2f} puntos porcentuales** en esta ejecución.
+Se utilizan las mismas cinco entradas y la misma prueba. No demuestra superioridad general ni significación estadística.
+
+#### Ejemplos reales
+
+{tabla(ejemplos)}
+
+Son dos aciertos y dos errores, escogidos para explicar el resultado. El modelo no recibe los títulos y estos ejemplos no se usan para elegirlo.
+''')
+
+    fig, ax1 = plt.subplots(figsize=(8, 4.5))
+    ax1.plot(historial['Época'], historial['Loss Train'], '--', color='tab:red', label='Train Loss')
+    ax1.plot(historial['Época'], historial['Loss Val'], color='tab:orange', label='Val Loss')
+    ax1.set(xlabel='Época', ylabel='Loss', title='Curva del Modelo Baseline')
+    ax1.legend(loc='upper right')
+    ax2 = ax1.twinx()
+    ax2.plot(historial['Época'], historial['Accuracy Val (%)'], color='tab:blue')
+    ax2.set_ylabel('Accuracy de validación (%)')
     fig.tight_layout()
-    fig.savefig(graficos / "comparacion.png", dpi=150)
+    fig.savefig(GRAFICOS / 'baseline.png', dpi=150)
     plt.close(fig)
 
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-    for columna, etiqueta in [("perdida_entreno", "Entrenamiento"),
-                              ("perdida_validacion", "Validación")]:
-        axes[0].plot(historial["epoca"], historial[columna], label=etiqueta)
-    axes[0].set(title=f"Pérdida de {ganador} (semilla 42)", xlabel="Época", ylabel="Entropía cruzada")
-    axes[0].legend()
-    for columna, etiqueta in [("accuracy_entreno", "Entrenamiento"),
-                              ("accuracy_validacion", "Validación")]:
-        axes[1].plot(historial["epoca"], historial[columna], label=etiqueta)
-    axes[1].set(title="Evolución de los aciertos", xlabel="Época", ylabel="Accuracy", ylim=(0, 1))
-    axes[1].legend()
+    fig, ax = plt.subplots(figsize=(8, 4))
+    metricas.loc[clases, ['precision', 'recall', 'f1-score']].plot.bar(ax=ax)
+    ax.set(title='Métricas por clase del modelo inicial', ylabel='Puntuación', ylim=(0, 1))
+    ax.tick_params(axis='x', rotation=0)
     fig.tight_layout()
-    fig.savefig(graficos / "aprendizaje.png", dpi=150)
+    fig.savefig(GRAFICOS / 'metricas_baseline.png', dpi=150)
     plt.close(fig)
 
-    fig, axes = plt.subplots(1, 3, figsize=(13, 3.8), sharey=True)
-    for ax, nombre in zip(axes, ["Exp_2", "Exp_3", "Exp_7"]):
-        curva = pd.read_csv(carpeta / f"historial_{nombre}_42.csv")
-        ax.plot(curva["epoca"], curva["perdida_entreno"], label="Entrenamiento")
-        ax.plot(curva["epoca"], curva["perdida_validacion"], label="Validación")
-        ax.set(title=f"{nombre} · semilla 42", xlabel="Época")
-        ax.legend(fontsize=8)
-    axes[0].set_ylabel("Entropía cruzada")
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+    axes[0].bar(comparacion['ID'], comparacion['Val Accuracy (%)'], yerr=comparacion['Desviación accuracy'], capsize=4, color='#287c8e')
+    axes[0].set(title='Accuracy media de validación', ylabel='Accuracy (%)')
+    comparacion.set_index('ID')[['Train Loss Final', 'Val Loss Final']].plot.bar(ax=axes[1])
+    axes[1].set(title='Pérdida final media', ylabel='Loss')
+    axes[1].tick_params(axis='x', rotation=0)
     fig.tight_layout()
-    fig.savefig(graficos / "sobreajuste.png", dpi=150)
+    fig.savefig(GRAFICOS / 'comparacion.png', dpi=150)
     plt.close(fig)
 
-    baseline = json.loads((carpeta / "baseline.json").read_text())
-    curva_base = pd.read_csv(carpeta / "historial_baseline.csv")
-    fig, ax = plt.subplots(figsize=(8, 4.5))
-    ax.plot(curva_base["epoca"], curva_base["perdida_entreno"], label="Entrenamiento")
-    ax.plot(curva_base["epoca"], curva_base["perdida_validacion"], label="Validación")
-    ax.set(title="Modelo inicial de dos capas de 64", xlabel="Época", ylabel="Entropía cruzada")
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(graficos / "baseline.png", dpi=150)
-    plt.close(fig)
-
-    fig, ax = plt.subplots(figsize=(7, 5))
-    imagen = ax.imshow(matriz.values, cmap="Blues")
-    ax.set_xticks(range(4), NOMBRES)
-    ax.set_yticks(range(4), NOMBRES)
-    ax.set(xlabel="Categoría predicha", ylabel="Categoría real",
-           title=f"Matriz de confusión en prueba · {ganador}, semilla 42")
-    for i in range(4):
-        for j in range(4):
-            ax.text(j, i, str(matriz.iloc[i, j]), ha="center", va="center",
-                    color="white" if matriz.iloc[i, j] > matriz.values.max() / 2 else "black")
+    matriz = pd.read_csv(RESULTADOS / 'matriz_confusion.csv', index_col=0)
+    fig, ax = plt.subplots(figsize=(7, 6))
+    imagen = ax.imshow(matriz, cmap='Blues')
+    for i in range(len(clases)):
+        for j in range(len(clases)):
+            ax.text(j, i, str(matriz.iloc[i, j]), ha='center', va='center', color='white' if matriz.iloc[i, j] > matriz.to_numpy().max() / 2 else 'black')
+    ax.set_xticks(range(len(clases)), clases, rotation=25, ha='right')
+    ax.set_yticks(range(len(clases)), clases)
+    ax.set(xlabel='Predicción', ylabel='Categoría real', title='Prueba final · Semilla 42')
     fig.colorbar(imagen, ax=ax)
     fig.tight_layout()
-    fig.savefig(graficos / "matriz_confusion.png", dpi=150)
+    fig.savefig(GRAFICOS / 'matriz_confusion.png', dpi=150)
     plt.close(fig)
-
-    principal = prueba[prueba["semilla"] == 42].iloc[0]
-    logistica = referencias[referencias["modelo"] == "Regresión logística"].iloc[0]
-    diferencia = resumen["f1_prueba_media"] - logistica["f1_prueba"]
-    if diferencia > 0:
-        conclusion = (f"La red obtiene un F1 macro medio {diferencia:.3f} superior al de la "
-                      "regresión logística en esta partición. Es una diferencia observada, "
-                      "no una prueba de superioridad general ni de significación estadística.")
-    else:
-        conclusion = ("La red no supera el F1 macro de la regresión logística en esta partición. "
-                      "La referencia sencilla también es competitiva. Usar una red cumple "
-                      "el objetivo de experimentar, pero no garantiza un mejor resultado.")
-    # Ejemplo de error concreto extraído de la matriz, sin inventar causas.
-    errores = matriz.to_numpy().copy()
-    np.fill_diagonal(errores, -1)
-    real, predicha = np.unravel_index(errores.argmax(), errores.shape)
-    if errores[real, predicha] > 0:
-        comentario_error = (f"El error más frecuente de la matriz es confundir **{NOMBRES[real]}** "
-                            f"con **{NOMBRES[predicha]}**, en **{errores[real, predicha]} películas**. "
-                            "Esto describe el error; la matriz no demuestra su causa.")
-    else:
-        comentario_error = "No hay errores de clasificación en esta matriz de prueba."
-    metricas_clases = pd.read_csv(carpeta / "metricas_clases.csv", index_col=0).iloc[:4]
-    metricas_clases = metricas_clases[["precision", "recall", "f1-score", "support"]].round(4)
-    metricas_clases = metricas_clases.reset_index().rename(columns={"index": "Categoría"})
-    config = resumen["configuracion"]
-    filas = resumen["filas"]
-    predicciones = pd.read_csv(carpeta / "predicciones_prueba.csv")
-    # Ejemplos para explicar la evaluación: los dos primeros de cada grupo.
-    ejemplos = pd.concat([predicciones[predicciones["acierto"]].head(2),
-                          predicciones[~predicciones["acierto"]].head(2)])
-    ejemplos.to_csv(carpeta / "ejemplos_defensa.csv", index=False)
-    ejemplos = ejemplos[["original_title", "popularity_level", "prediccion", "acierto"]].copy()
-    traduccion = dict(zip(CATEGORIAS, NOMBRES))
-    for columna in ["popularity_level", "prediccion"]:
-        ejemplos[columna] = ejemplos[columna].map(traduccion)
-    ejemplos["acierto"] = ejemplos["acierto"].map({True: "Sí", False: "No"})
-    ejemplos.columns = ["Película", "Categoría real", "Predicción", "Acierto"]
-    segunda = comparacion.iloc[1]
-    diferencia_validacion = comparacion.iloc[0]["f1_validacion"] - segunda["f1_validacion"]
-    puntuaciones = comparacion.set_index("experimento")["f1_validacion"]
-    explicacion = f"""La ventaja de {ganador} respecto a {segunda['experimento']} es de solo
-**{diferencia_validacion:.4f} de F1 macro**. Las desviaciones entre semillas son
-**{comparacion.iloc[0]['f1_desviacion']:.4f}** y **{segunda['f1_desviacion']:.4f}**,
-respectivamente. La elección cumple nuestro criterio; tres inicializaciones
-sobre una muestra no demuestran una superioridad general.
-
-En los cambios controlados, pasar de Exp_1 a Exp_8 cambia el F1 medio en
-**{puntuaciones['Exp_8'] - puntuaciones['Exp_1']:+.3f}**; de Exp_8 a Exp_2, en
-**{puntuaciones['Exp_2'] - puntuaciones['Exp_8']:+.3f}**; reducir el lote de Exp_2 a Exp_4,
-en **{puntuaciones['Exp_4'] - puntuaciones['Exp_2']:+.3f}**; aumentar el lote de Exp_2
-a Exp_5, en **{puntuaciones['Exp_5'] - puntuaciones['Exp_2']:+.3f}**; y reducir la tasa de
-aprendizaje de Exp_2 a Exp_6, en **{puntuaciones['Exp_6'] - puntuaciones['Exp_2']:+.3f}**.
-Son diferencias descriptivas de este ensayo, con variabilidad entre semillas.
-
-Exp_7, con tasa 0,0001, obtiene un F1 medio de validación de
-**{puntuaciones['Exp_7']:.3f}** dentro del límite de 15 épocas. Su peor resultado
-es compatible con un aprendizaje más lento: no demuestra que esa tasa sea mala
-si se permite más entrenamiento. La red más profunda, Exp_3, obtiene
-**{puntuaciones['Exp_3']:.3f}**, por lo que aumentar capas y neuronas tampoco
-garantiza mejorar en este ensayo.
-"""
-    detalle = pd.read_csv(carpeta / "experimentos_detalle.csv")
-    epocas_elegidas = detalle.loc[detalle["experimento"] == ganador, "mejor_epoca"].tolist()
-    if all(epoca == resumen["epocas_maximas"] for epoca in epocas_elegidas):
-        explicacion += ("\nLas tres ejecuciones elegidas conservan la última época disponible, "
-                        f"la {resumen['epocas_maximas']}. Esto indica que el límite de entrenamiento puede estar "
-                        "condicionando el resultado. Una mejora futura sería estudiar más "
-                        "épocas en validación; no hemos cambiado el plan después de ver prueba.\n")
-    texto = f"""## Modelo inicial del equipo
-
-Conservamos el planteamiento de `preparacion_datos_entrenamiento.py`: cinco
-entradas, dos capas ocultas de 64 neuronas, lote 32, Adam con tasa 0,01 y
-10 épocas. Con las correcciones y la nueva separación de datos, la accuracy
-de validación es **{baseline['accuracy_validacion']:.1%}** y el F1 macro de
-validación es **{baseline['f1_validacion']:.3f}**.
-
-![Pérdida del modelo inicial calculada durante la ejecución, sin valores escritos a mano.](graficos/baseline.png)
-
-Las cifras anteriores del informe de desarrollo correspondían a otro reparto
-de datos y no se comparan directamente con estas. Este modelo inicial se mide
-solo en validación; reservamos prueba para la configuración elegida después.
-
-## Comparación de configuraciones
-
-La partición contiene **{filas['entrenamiento']} películas de entrenamiento**,
-**{filas['validacion']} de validación** y **{filas['prueba']} de prueba**.
-Hay **{len(resumen['entradas'])} variables de entrada**. Entrenamos **{len(comparacion)}
-configuraciones** con tres semillas cada una: **{len(comparacion) * 3} entrenamientos**,
-además del modelo inicial. Los datos
-asignados a cada conjunto son siempre los mismos.
-
-{tabla_markdown(tabla)}
-
-![F1 macro de validación. Las barras muestran la desviación entre tres inicializaciones.](graficos/comparacion.png)
-
-Elegimos **{ganador}**, con capas ocultas **{config['capas']}**, lote
-**{config['batch']}** y tasa de aprendizaje **{config['lr']}**, porque tiene el
-mayor F1 macro medio en validación. Si hay empate, preferimos la menor
-desviación. Dentro de cada entrenamiento recuperamos la época de menor
-pérdida de validación; no usamos la última época automáticamente.
-
-Exp_1 frente a Exp_8 cambia las neuronas de una capa. Exp_8 frente a Exp_2
-añade una segunda capa manteniendo 64 neuronas en la primera. Exp_2 frente a
-Exp_3 cambia profundidad y anchura a la vez, por lo que no aislamos sus efectos.
-Exp_4 y Exp_5 cambian solo el lote respecto a Exp_2. Exp_6 y Exp_7 cambian
-solo la tasa de aprendizaje respecto a Exp_2.
-
-{explicacion}
-
-## Curvas de aprendizaje
-
-![Pérdida y accuracy durante las 15 épocas de la configuración elegida.](graficos/aprendizaje.png)
-
-La curva corresponde a la semilla 42, fijada de antemano. Si la pérdida de
-entrenamiento baja mientras la de validación sube, hay indicios de
-sobreajuste. Las curvas muestran todas las épocas, aunque recuperamos el
-estado de menor pérdida de validación.
-
-![Comparación de las pérdidas de tres configuraciones, manteniendo la semilla 42.](graficos/sobreajuste.png)
-
-Estas curvas permiten ver si una mayor complejidad o un aprendizaje más rápido
-reducen la pérdida de entrenamiento sin mejorar validación. Se muestran todas
-las épocas, pero las métricas comparadas corresponden a los pesos recuperados
-por validación. Las curvas no justifican elegir una red por su acierto de
-entrenamiento.
-
-## Evaluación final en prueba
-
-Consultamos prueba después de elegir la configuración. Para las tres semillas,
-la accuracy media es **{resumen['accuracy_prueba_media']:.1%}** y el F1 macro
-medio es **{resumen['f1_prueba_media']:.3f} ± {resumen['f1_prueba_desviacion']:.3f}**.
-La desviación resume tres inicializaciones sobre UNA partición; no es un
-intervalo de confianza ni mide la variación entre distintas muestras.
-
-El F1 medio de validación de la configuración elegida es
-**{comparacion.iloc[0]['f1_validacion']:.3f}**. Su descenso hasta
-**{resumen['f1_prueba_media']:.3f}** en prueba muestra que la estimación de
-validación fue más favorable. La muestra reservada es pequeña y la selección
-entre configuraciones también puede favorecer resultados optimistas en
-validación. No retocamos el modelo tras observar esta prueba.
-
-{tabla_markdown(prueba.round(4))}
-
-Para la matriz y los ejemplos usamos siempre la semilla 42: accuracy
-**{principal['accuracy']:.1%}** y F1 macro **{principal['f1_macro']:.3f}**.
-
-![La diagonal contiene los aciertos; fuera de ella están los errores.](graficos/matriz_confusion.png)
-
-{comentario_error}
-
-{tabla_markdown(metricas_clases)}
-
-## Ejemplos de películas de prueba
-
-Mostramos los dos primeros aciertos y los dos primeros errores del archivo
-de predicciones de la semilla 42. Son ejemplos para entender la salida del
-modelo; no son una muestra representativa ni se utilizan para elegir la red.
-
-{tabla_markdown(ejemplos)}
-
-Una predicción equivocada no cambia la etiqueta real. Por ejemplo, una
-película puede aparecer en Media-alta y ser clasificada como Alta. Eso cuenta
-como un error igual que cualquier otra confusión, porque hemos utilizado
-clasificación nominal con CrossEntropyLoss.
-
-## Comparación con referencias sencillas
-
-La clase mayoritaria se decide usando entrenamiento. La regresión logística
-usa las mismas entradas normalizadas y es un clasificador, a pesar de su
-nombre. No hemos ajustado sus hiperparámetros. Estas referencias ayudan a
-valorar si la red aporta algo frente a soluciones menos complejas.
-
-{tabla_markdown(referencias)}
-
-## Conclusiones de los resultados
-
-1. **{ganador}** es la configuración seleccionada por validación en este ensayo.
-   Eso no implica que sea la mejor red para cualquier dataset.
-2. {conclusion}
-3. La accuracy mide la proporción de aciertos. El F1 macro combina precisión
-   y exhaustividad y da el mismo peso a cada categoría. Por eso lo utilizamos
-   como criterio de comparación.
-4. Tres semillas ayudan a comprobar la sensibilidad a la inicialización.
-   Para conclusiones más sólidas harían falta otras particiones y más datos.
-
-Los CSV detallados, las predicciones, los parámetros de normalización y los
-pesos se guardan en `resultados/`. Las versiones utilizadas son:
-`{resumen['versiones']}`.
-"""
-    destino.write_text(texto, encoding="utf-8")
+    ganador = resumen['experimento_elegido']
+    curva = pd.read_csv(RESULTADOS / f'historial_{ganador}_42.csv')
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.plot(curva['Época'], curva['Loss Train'], label='Entrenamiento')
+    ax.plot(curva['Época'], curva['Loss Val'], label='Validación')
+    ax.set(title=f'Curvas de {ganador} · Semilla 42', xlabel='Época', ylabel='Loss')
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(GRAFICOS / 'curvas_ganador.png', dpi=150)
+    plt.close(fig)
+    print('Tablas y cinco figuras del entrenamiento generadas desde los resultados.')
 
 
-if __name__ == "__main__":
-    generar_resultados()
+if __name__ == '__main__':
+    generar()

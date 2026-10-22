@@ -1,50 +1,30 @@
 {
-  "experimento_elegido": "Exp_2",
+  "base": "0857c4b",
+  "experimento_elegido": "Exp_1",
   "configuracion": {
-    "nombre": "Exp_2",
-    "capas": [
-      64,
+    "hidden_layers": [
       32
     ],
-    "batch": 32,
-    "lr": 0.01
+    "batch_size": 32,
+    "learning_rate": 0.01
   },
-  "numero_experimentos": 8,
-  "epocas_maximas": 15,
+  "configuraciones": 7,
   "semillas": [
     42,
     7,
     21
   ],
-  "semilla_principal": 42,
-  "criterio": "Mayor F1 macro medio en validación; desempate por menor desviación",
-  "entradas": [
-    "budget",
-    "runtime",
-    "vote_count",
-    "vote_average",
-    "release_year"
-  ],
-  "categorias": [
+  "epocas": 15,
+  "entrenamiento": 893,
+  "validacion": 191,
+  "prueba": 192,
+  "clases": [
+    "High",
     "Low",
     "Medium",
-    "Moderately High",
-    "High"
+    "Moderately High"
   ],
-  "filas": {
-    "entrenamiento": 893,
-    "validacion": 191,
-    "prueba": 192
-  },
-  "accuracy_prueba_media": 0.609375,
-  "f1_prueba_media": 0.6026600276398034,
-  "f1_prueba_desviacion": 0.0017647051823018514,
-  "accuracy_prueba_principal": 0.609375,
-  "f1_prueba_principal": 0.6034613035771662,
-  "versiones": {
-    "python": "3.14.3",
-    "torch": "2.14.1",
-    "numpy": "2.5.4",
-    "pandas": "2.3.3"
-  }
+  "accuracy_prueba_media": 0.6753472222222223,
+  "f1_prueba_medio": 0.6732657639647012,
+  "accuracy_validacion_media": 0.6178010471204188
 }

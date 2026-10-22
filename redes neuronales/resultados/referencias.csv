@@ -1,3 +1,4 @@
-modelo,accuracy_validacion,f1_validacion,accuracy_prueba,f1_prueba
-Clase mayoritaria,0.2513089005235602,0.100418410041841,0.25,0.1
-Regresión logística,0.6230366492146597,0.6231770154870458,0.5885416666666666,0.5879933587734003
+Modelo,Accuracy prueba (%)
+Clase mayoritaria,25.520833333333332
+Regresión logística,63.541666666666664
+Red neuronal,67.53472222222223

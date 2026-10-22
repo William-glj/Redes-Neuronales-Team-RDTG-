@@ -1,331 +1,451 @@
 ---
-title: "Redes neuronales: popularidad de películas"
-subtitle: "Exploración de datos y comparación de redes neuronales con PyTorch"
-author: "José Ramón · Guillermo · Dylan · Tomás"
-date: "2026-10-23"
+title: "Redes Neuronales"
+subtitle: "Tomas | Ramón | Dylan | Guillermo"
+editor: visual
 output-file: index.html
+lang: es
+format: html
 ---
 
-# Introducción
 
-Hemos elegido el **cine** como temática del proyecto. Nos interesa estudiar
-si las características de las películas permiten distinguir cuatro niveles
-de popularidad: **baja, media, media-alta y alta**.
+En este proyecto analizamos el sector cinematográfico a través del conjunto de datos de TMDB con el objetivo de predecir el nivel de popularidad de una película (clasificándola en diferentes categorías como baja, media, media-alta o alta) mediante un modelo de clasificación multiclase basado en redes neuronales con PyTorch. El flujo de trabajo abarca desde un Análisis Exploratorio de Datos (EDA) —donde limpiamos registros, tratamos valores nulos y analizamos variables clave como presupuesto, ingresos, géneros o duración— hasta la definición de la arquitectura de deep learning y la experimentación sistemática con hiperparámetros (capas ocultas, tamaño de lote y tasa de aprendizaje) mediante una estrategia de búsqueda en malla (Grid Search) para identificar la configuración con mejor rendimiento predictivo.
 
-El objetivo es comparar distintas redes neuronales de clasificación. No
-intentamos predecir una cifra de recaudación, ni afirmar que una película
-vaya a triunfar antes de estrenarse. Utilizamos votos y valoraciones del
-público, por lo que nuestro análisis es **posterior al estreno**.
+## 1. Fase A (Obtención de Datos y Análisis Exploratorio (EDA))
 
-Este informe continúa el trabajo de la rama `desarrollo` del equipo. Mantenemos
-su selección comercial de películas, sus cinco variables explicativas, el
-modelo inicial y las siete configuraciones de partida. Añadimos una octava
-comparación para estudiar la anchura de una capa, repetimos con tres semillas
-y reservamos una prueba final independiente. Las tablas y figuras de resultados
-se generan con las ejecuciones, en lugar de escribir las cifras a mano.
+En este apartado en referencia al *Exploratory Data Analysis* (EDA), fundamentamos el dataset de los datos complementando  patrones, identificando anomalías y limpiando linterferencias de datos.
 
-## Datos y procedencia
 
-El archivo de partida es `datos/peliculas_original.csv`, llamado originalmente
-`TMBD Movie Dataset.csv`. Es la copia que ya estaba en el
-[repositorio del equipo, rama desarrollo](https://github.com/William-glj/Redes-Neuronales-Team-RDTG-/tree/desarrollo).
-Contiene 1.287 películas con años de estreno entre 1961 y 2015.
 
-Hemos contrastado esta selección con el dataset público
-[TMDb Movies Dataset, publicado por Juzer Shakir en Kaggle](https://www.kaggle.com/datasets/juzershakir/tmdb-movies-dataset).
-Su versión 1 contiene 10.866 películas y 21 columnas. Los mismos 1.287
-identificadores se obtienen al sustituir por nulos los ceros de presupuesto
-y recaudación, eliminar filas con nulos y quitar duplicados. No presentamos
-esta selección como todo el catálogo de TMDB ni como el dataset TMDB 5000.
+### 1.1. Carga de datos y limpieza inicial
 
-La comparación de sus 21 columnas identifica diferencias de formato,
-redondeo y 12 fechas con el siglo incorrecto en la copia recibida. El año
-separado `release_year` sí coincide con el público; corregimos las fechas
-en el EDA. La selección previa de casos completos limita la representatividad.
-
-La comprobación está en `comprobar_fuente.py`, `datos/fuente.md` y
-`datos/fuente_verificada.json`. Verifica una fuente pública equivalente;
-no acredita desde qué enlace descargó el equipo la copia antigua. La ficha
-consultada indica licencia **Unknown**, por lo que no atribuimos una licencia
-abierta que no está documentada.
-
-Para la definición del indicador consultamos la
-[documentación oficial de TMDB](https://developer.themoviedb.org/docs/popularity-and-trending).
-Actualmente describe la popularidad usando, entre otros factores, votos,
-visitas y fecha de estreno. No podemos asegurar que su fórmula histórica
-fuera idéntica. El número de votos es una señal muy relacionada con la
-popularidad: esta clasificación reconstruye un indicador de la muestra,
-no demuestra una relación causal.
-
-# Exploración y limpieza
-
-Primero leemos los datos con pandas y hacemos una copia para conservar el
-archivo recibido. NumPy se utiliza para revisar valores no finitos,
-transformar variables y preparar las entradas.
+En este paso importamos las librerías necesarias (`pandas` y `numpy`), realizamos la lectura del dataset original y ejecutamos el proceso de depuración de registros duplicados e inconsistentes.
 
 ```python
-df_original = pd.read_csv("datos/peliculas_original.csv")
+# Cargamos los datos del dataset original
+df_original = pd.read_csv(CARPETA / 'TMBD Movie Dataset.csv')
+print(f"Dimensiones iniciales: {df_original.shape[0]} filas, {df_original.shape[1]} columnas")
+
 df = df_original.copy()
-print(df.shape)
-print(df.isna().sum())
+
+# Eliminación de películas duplicadas por ID
+filas_duplicadas = df.duplicated(subset=['id']).sum()
+if filas_duplicadas > 0:
+    df = df.drop_duplicates(subset=['id'], keep='first')
+
+# Filtrado inicial por umbral comercial de presupuesto y recaudación
+len_antes_br = len(df)
+budget_revenue = (df['budget'] > 10000) & (df['revenue'] > 10000)
+df_clean = df[budget_revenue].copy()
+filas_eliminadas_br = len_antes_br - len(df_clean)
+print(f"Se eliminaron {filas_eliminadas_br} filas con presupuesto o recaudación incoherentes")
+
+
+# Convertir fechas a formato datetime
+df_clean['release_date'] = pd.to_datetime(df_clean['release_date'], errors='coerce')
+# El año separado se ha contrastado con la fuente pública. Corregimos 12 siglos.
+fechas_incoherentes = (df_clean['release_date'].dt.year != df_clean['release_year']) & df_clean['release_date'].notna()
+fechas = df_clean.loc[fechas_incoherentes, ['id', 'original_title', 'release_date']].copy()
+fechas.columns = ['id', 'original_title', 'fecha_recibida']
+fechas_nuevas = (df_clean.loc[fechas_incoherentes, 'release_year'].astype(int).astype(str)
+                 + '-' + df_clean.loc[fechas_incoherentes, 'release_date'].dt.strftime('%m-%d'))
+df_clean.loc[fechas_incoherentes, 'release_date'] = pd.to_datetime(fechas_nuevas)
+fechas['fecha_corregida'] = df_clean.loc[fechas_incoherentes, 'release_date']
+fechas.to_csv(RESULTADOS / 'fechas_corregidas.csv', index=False)
+
+# Columnas críticas donde un valor de 0 o un nulo (NaN) es un error inaceptable
+columnas_criticas = ['runtime', 'budget', 'revenue', 'vote_count', 'vote_average']
+
+# Transformamos cualquier '0' en un nulo en esas columnas
+df_clean[columnas_criticas] = df_clean[columnas_criticas].replace(0, np.nan)
+
+# Eliminamos todas las filas que tengan un NaN o fecha nula
+nulos_antes_drop = len(df_clean)
+df_clean = df_clean.dropna(subset=columnas_criticas + ['release_date', 'popularity_level'])
+# No convertimos una etiqueta ausente en una quinta clase llamada 'nan'.
+filas_eliminadas_totales = nulos_antes_drop - len(df_clean)
+
+print(f"Se eliminaron {filas_eliminadas_totales} filas por contener valores nulos o ceros")
+
+# Conservar texto intacto y asegurar tipos numéricos enteros
+df_clean['budget'] = df_clean['budget'].astype(int)
+df_clean['revenue'] = df_clean['revenue'].astype(int)
+
+# Resumen final
+print(f"\nRESUMEN DE LIMPIEZA: {len(df_original)} registros iniciales -> {len(df_clean)} registros limpios finales.")
+
+# Guardar el archivo final manteniendo el resto de columnas disponibles
+df_clean.to_csv(CARPETA / 'IMBD_Movie_Dataset_limpio.csv', index=False)
 ```
 
-Quitamos el índice exportado y revisamos duplicados por `id`. Eliminamos las
-filas sin una categoría válida. Los valores numéricos imposibles se marcan
-como nulos; si hay que imputarlos, su mediana se calcula después de dividir
-los datos y usando únicamente entrenamiento.
+### 1.2. Muestra y Vista Previa del Dataset Limpio
+
+A continuación se muestra una lectura de prueba adaptada automáticamente a los nombres de columna presentes en el archivo:
 
 ```python
-df = df.drop_duplicates(subset="id").copy()
-df = df[df["popularity_level"].isin(CATEGORIAS)].copy()
+# Selección dinámica de columnas para evitar errores si alguna variable varía su nombre
+columnas_deseadas = ['id', 'title', 'original_title', 'release_date', 'budget', 'revenue', 'runtime', 'genres']
+columnas_existentes = [col for col in columnas_deseadas if col in df_clean.columns]
+
+if not columnas_existentes:
+    columnas_existentes = list(df_clean.columns[:7])
+
+df_clean[columnas_existentes].head()
 ```
 
-{{< include resultados/resumen_eda.qmd >}}
+#### Muestra real del archivo limpio
 
-## Visualización de los datos
+{{< include resultados/muestra.qmd >}}
 
-Las figuras siguientes se generan con matplotlib. Cada una responde a una
-pregunta del análisis; no se usan como entradas de la red.
-
-### ¿Están equilibradas las categorías?
-
-![Cantidad de películas de cada categoría.](graficos/clases.png)
-
-Las categorías tienen prácticamente el mismo tamaño. La accuracy resulta
-fácil de interpretar en esta muestra, pero añadimos F1 macro para evaluar
-todas las categorías con el mismo peso.
-
-### ¿Por qué transformar el presupuesto?
-
-![Presupuesto antes y después de aplicar logaritmo.](graficos/presupuesto.png)
-
-Los importes financieros abarcan varios órdenes de magnitud. El logaritmo
-reduce la distancia entre importes pequeños y grandes. No corrige posibles
-errores de unidades ni convierte cifras sospechosas en datos fiables.
+### 1.3. Resumen Estadístico de las Variables Cuantitativas
 
 ```python
-for columna in ["budget", "vote_count"]:
-    valores[columna] = np.log1p(valores[columna])
+# Descripción estadística general de las variables cuantitativas disponibles
+columnas_num = [col for col in ['budget', 'revenue', 'runtime'] if col in df_clean.columns]
+if columnas_num:
+    df_clean[columnas_num].describe().round(2)
+else:
+    df_clean.describe().round(2)
 ```
 
-### ¿La duración separa las categorías?
 
-![Distribución de duraciones por categoría.](graficos/duracion.png)
+{{< include resultados/estadisticas.qmd >}}
 
-Las cajas permiten comparar medianas, dispersión y extremos. El solapamiento
-entre grupos indica que una duración por sí sola no separa claramente las
-cuatro categorías. Una observación fuera de los bigotes no es necesariamente
-un error.
+Una variable cuantitativa es aquella que expresa una cantidad o valor numérico sobre el cual tiene sentido realizar operaciones matemáticas. En nuestro esquema de matería elementos como el presupuesto y la recaudación son indispensables para poder conocer si una película ha sido exitosa o no.Bajo esa lógica, convertimos presupuesto y recaudación a enteros porque los importes del archivo se representan sin fracciones; esto no garantiza ahorrar memoria.
 
-### ¿Qué géneros aparecen más?
 
-![Géneros más frecuentes. Cada película puede aparecer en varios géneros.](graficos/generos.png)
+### 1.4. Resumen final del apartado
 
-Una película puede tener varios géneros separados por `|`. Por eso la suma
-de estas barras puede superar el número de películas. Creamos una entrada
-0/1 para contar las apariciones en este gráfico. Los géneros se exploran en
-el EDA, pero no entran al modelo de cinco variables que ya tenía el equipo.
+Entonces ¿Qué tenemos?¿Qué estamos viendo y haciendo?
 
-### ¿Qué variables se relacionan?
-
-![Correlaciones entre variables numéricas de la muestra.](graficos/correlaciones.png)
-
-La correlación resume asociaciones lineales y puede verse influida por
-valores extremos. Una correlación alta no demuestra causalidad. Analizamos
-`popularity` en esta figura para entender el problema, pero la excluimos
-de las entradas del clasificador. Los votos son una señal especialmente
-relacionada con el indicador, lo que refuerza el carácter retrospectivo del ejercicio.
-
-# Definición del problema
-
-## Qué queremos clasificar
-
-La variable dependiente es `popularity_level`. Conservamos las cuatro
-etiquetas que ya venían en el archivo. Hemos comprobado que se reproducen con
-`pd.cut` usando mínimo, cuartiles y máximo de la popularidad de las 1.287
-películas. La fila del mínimo queda sin etiqueta si no se incluye el extremo
-inferior. Esa es la fila que eliminamos. No conservamos el código antiguo que
-creó la columna: hemos verificado una forma de reproducirla.
-
-Los cortes son propios de esta muestra, no categorías oficiales de TMDB.
-No redefinimos las etiquetas ni elegimos cortes para mejorar el resultado de
-prueba. La comprobación posterior de procedencia no cambia el entrenamiento.
-Los rangos tras limpiar se guardan en `resultados/rangos_categorias.csv`.
-
-| Etiqueta original | Nombre en el informe | Código para PyTorch |
-| --- | --- | --- |
-| Low | Baja | 0 |
-| Medium | Media | 1 |
-| Moderately High | Media-alta | 2 |
-| High | Alta | 3 |
-
-Aunque existe un orden, tratamos las etiquetas como cuatro clases nominales:
-la pérdida no distingue entre un error a la categoría vecina y otro más lejano.
-
-## Variables explicativas
-
-| Variable | Uso |
-| --- | --- |
-| `budget` | Presupuesto: logaritmo y normalización. |
-| `runtime` | Duración: normalización. |
-| `vote_count` | Número de votos: logaritmo y normalización. |
-| `vote_average` | Nota media: normalización. |
-| `release_year` | Año: normalización. |
-
-Excluimos `popularity` porque está directamente ligada a la etiqueta.
-También excluimos identificadores, título, URLs y textos libres para
-mantener el modelo tabular del equipo. `revenue` y `genres` se estudian en el
-EDA, pero no se añaden a las cinco entradas originales. No añadimos `profit`, `budget_adj` ni
-`revenue_adj`: evitamos variables derivadas o redundantes para esta primera
-comparación.
-
-## Por qué probar una red neuronal
-
-El problema combina cinco variables numéricas para clasificar
-cuatro grupos que se solapan. Una red con ReLU puede aprender relaciones no
-lineales e interacciones. Esto justifica **experimentar** con ella, no afirmar
-de antemano que sea superior a un modelo sencillo. Incluimos una regresión
-logística multiclase como referencia. A pesar de su nombre, la regresión
-logística es un clasificador; no estamos resolviendo una regresión de una
-variable numérica.
-
-# Preparación y entrenamiento
-
-## Separación de los datos
-
-Utilizamos `train_test_split`, como en el código inicial del equipo, con una
-semilla fija y `stratify` para conservar las proporciones de las clases.
-Reservamos aproximadamente 70 % para entrenamiento, 15 % para validación y
-15 % para prueba. El redondeo impide que todos los tamaños sean porcentajes exactos.
-
-- **Entrenamiento:** actualiza los pesos y permite calcular el preprocesado.
-- **Validación:** selecciona la configuración y la época que conservamos.
-- **Prueba:** se consulta al final para evaluar la configuración elegida.
-
-Las medianas, medias y desviaciones se obtienen solo de entrenamiento.
-Después se aplican las mismas transformaciones a los otros conjuntos.
+Hemos partido del fichero inicial del Dataset con el fin de recogerlo como una muestra de datos, revisamos duplicados, nulos, tipos y fechas. Aplicamos el filtro comercial del equipo y excluimos una película sin categoría. Conservamos la muestra recibida y documentamos sus límites; no representa todas las películas.
 
 ```python
-medianas = entreno[FEATURE_COLS].median()
+# No creamos una categoría "nan" a partir de una etiqueta desconocida.
+df_clean = df_clean.dropna(subset=columnas_criticas + ['release_date', 'popularity_level'])
+df_clean.to_csv(CARPETA / 'IMBD_Movie_Dataset_limpio.csv', index=False)
+```
+
+### 1.5. Diagnóstico y visualización
+
+{{< include resultados/limpieza.qmd >}}
+
+{{< include resultados/diagnostico.qmd >}}
+
+Un nulo significa dato desconocido. El script del grupo transforma ceros de las columnas críticas en nulos y elimina esas filas. En esta muestra, la exclusión adicional corresponde a la categoría ausente. No ha sido necesario imputar las cinco entradas. Las doce fechas corregidas quedan registradas en `resultados/fechas_corregidas.csv`.
+
+El filtro de presupuesto y recaudación superior a 10.000 es una decisión heredada de selección comercial. Un importe bajo no demuestra por sí solo un error.
+
+Para detectar atípicos usamos IQR: valores fuera de Q1 − 1,5 × IQR y Q3 + 1,5 × IQR. Conservamos los extremos que pueden ser válidos, como superproducciones. StandardScaler ajusta las escalas al preparar las entradas, pero no elimina ni comprime los extremos. Probar logaritmos queda como posible mejora futura.
+
+![Las cuatro categorías tienen tamaños parecidos.](graficos/categorias.png)
+
+![Los presupuestos presentan una distribución asimétrica y algunos valores muy altos.](graficos/presupuesto.png)
+
+![Las duraciones se solapan entre categorías: por sí solas no separan las clases.](graficos/duracion.png)
+
+![Una película puede tener varios géneros; las apariciones no equivalen al número de películas.](graficos/generos.png)
+
+![La correlación resume asociaciones lineales, sin demostrar causalidad.](graficos/correlaciones.png)
+
+## 2. Fase B
+
+Consiste en implementar la red neuronal en PyTorch para resolver el problema de clasificación, realizando un ajuste sistemático de hiperparámetros (capas, neuronas, batch size y learning rate) para encontrar la arquitectura con mejor capacidad predictiva.
+
+### 2.1 Fase B: Definición y Entrenamiento del Modelo
+
+**El problema elegido**
+
+
+Producir una obra cinematográfica exige una inversión enorme de recursos humanos, creativos y financieros, por lo que comprender qué factores impulsan el impacto de una película en el público es clave para la industria.
+
+Nuestro propósito de este proyecto es abordar el problema como una clasificación multiclase del nivel de popularidad (High, Moderately High, Medium, Low) a partir de sus características principales.
+
+En nuestro conjunto de datos, esta variable objetivo se representa mediante la etiqueta `popularity_level`, la cual codificamos numéricamente para alimentar nuestro modelo de clasificación multiclase.
+
+
+
+#### 2.1.1. Definición de Variables
+
+Para poder llevar acabo la medición del exito  es necesario diferenciar entre:
+
+* **Variable Dependiente ($y$):** Categoría de popularidad de la película (variable categórica multiclase derivada de los datos).
+* **Variables Explicativas ($X$):** Conjunto de 5 variables numéricas continuas/discretas: presupuesto, duración, número de votos, valoración media y año de estreno.
+
+```python
+# 2. Seleccionar las variables explicativas (X) y la variable objetivo (Y)
+feature_cols = ['budget', 'runtime', 'vote_count', 'vote_average', 'release_year']
+X = df[feature_cols].values
+
+# Convertir la variable categórica 'popularity_level' a etiquetas numéricas enteras
+label_encoder = LabelEncoder()
+if df['popularity_level'].isna().any():
+    raise ValueError('Hay etiquetas ausentes. Ejecutar EDA.py primero.')
+y = label_encoder.fit_transform(df['popularity_level'])
+
+# 3. Reservar prueba final y separar entrenamiento y validación (70/15/15).
+indices = np.arange(len(df))
+idx_train, idx_reserva = train_test_split(indices, test_size=0.30, random_state=42, stratify=y)
+idx_val, idx_test = train_test_split(idx_reserva, test_size=0.50, random_state=42, stratify=y[idx_reserva])
+X_train, X_val, X_test = X[idx_train], X[idx_val], X[idx_test]
+y_train, y_val, y_test = y[idx_train], y[idx_val], y[idx_test]
+
+# 4. Normalizar los datos numéricos (media 0 y desviación típica 1)
 scaler = StandardScaler()
-x_entreno = scaler.fit_transform(valores_numericos[0])
-x_val = scaler.transform(valores_numericos[1])
-x_prueba = scaler.transform(valores_numericos[2])
+X_train = scaler.fit_transform(X_train)
+X_val = scaler.transform(X_val)
+X_test = scaler.transform(X_test)
 ```
 
-`valores_numericos[0]` contiene entrenamiento, después de imputar y aplicar los
-logaritmos. Normalizar evita que la escala del presupuesto domine a la de
-la nota o la duración. `StandardScaler` también trata las columnas constantes
-para evitar una división por cero.
+`popularity_level` procede de agrupar la puntuación `popularity` en cuatro categorías; los cortes son propios de esta muestra. Excluimos `popularity` de las entradas porque determina directamente la respuesta. La nota media y los votos son posteriores al estreno: clasificamos películas ya observadas y no predecimos su éxito antes de estrenarse.
 
-## Construcción de la red
+La separación se hace una sola vez con semilla 42 y proporciones aproximadas 70/15/15. `stratify` conserva las proporciones de clases. Solo entrenamiento ajusta StandardScaler; validación y prueba utilizan su transformación. Prueba queda reservada hasta elegir la configuración.
 
-Utilizamos **PyTorch**, con capas `Linear` y activación `ReLU`. Las capas
-ocultas cambian entre experimentos; la salida siempre tiene cuatro neuronas.
-Una red de ejemplo con dos capas ocultas es:
+#### 2.1.2. Justificación del Uso de Redes Neuronales
+Probamos una red neuronal porque permite estudiar relaciones no lineales e interacciones entre las entradas. Comparamos después con regresión logística, que también es un clasificador. No damos por supuesta la superioridad de la red:
+
+1. **Relaciones No Lineales:** La relación entre variables económicas (presupuesto y recaudación) y el éxito/popularidad de una película no es puramente proporcional. Existen efectos de escala y rendimientos decrecientes.
+
+**Ejemplo ilustrativo, no resultado medido:** Un aumento constante en la variable no produce un aumento constante en la popularidad.
+
+**Caso A** (De 1 a 20 millones de presupuesto): Pasar de una película independiente a un presupuesto medio permite contratar actores conocidos y hacer promoción. Esto podría asociarse a un aumento de popularidad.
+
+**Caso B** (De 200 a 220 millones de presupuesto): En una película de presupuesto muy alto, gastar 20 millones más podría tener un efecto diferente sobre la popularidad. Es una posibilidad ilustrativa, no una relación demostrada.
+
+
+
+2. **Interacciones Complejas:** Una red neuronal perceptrón multicapa (MLP) permite combinar las 5 características mediante capas ocultas con funciones de activación no lineales (ReLU), capturando patrones y combinaciones complejas que una regresión simple no puede modelar.
+
+**Ejemplo ilustrativo:** El impacto de una variable puede depender de las demás.
+
+Película de 180 minutos con nota 5.0: Podría despertar menos interés que otra película mejor valorada. No hemos demostrado esa causa con el dataset.
+
+Película de 180 minutos con nota 8.8: podría atraer más interés. Estos ejemplos sirven para explicar posibles interacciones; no son predicciones reales de la red.
+
+3. **Clasificación Multiclase:** La arquitectura ajusta múltiples *logits* de salida simultáneamente mediante la función `CrossEntropyLoss`, comparando los logits con la categoría correcta. Ser multiclase no exige por sí solo una red neuronal.
+
+
+Punto: Generar puntuaciones (logits) para decidir a qué categoría pertenece una película.
+
+El orden lo establece `LabelEncoder`: **0 = High (Alta), 1 = Low (Baja), 2 = Medium (Media), 3 = Moderately High (Media-alta)**.
+
+Ejemplo inventado para entender la salida: `Logits = [4.5, -2.5, -0.8, 1.2]`. El valor mayor está en la posición 0, por lo que se predice High. Son puntuaciones, no porcentajes, y el ejemplo no corresponde a una película de prueba.
+
+### 2.2 Fase B: Modulo inicial
+
+
+
+#### 2.2.1 Código
+
+**Inicialización del modelo, pérdida y optimizador**
+```python
+model = PeliculasNeuralNetwork(input_dim=5, hidden_dim=64, output_dim=4)
+criterio = nn.CrossEntropyLoss()
+optimizador = optim.Adam(model.parameters(), lr=0.01)
+```
+**Función para evaluar la red sin calcular gradientes**
 
 ```python
-modelo = nn.Sequential(
-    nn.Linear(5, 64),
-    nn.ReLU(),
-    nn.Linear(64, 32),
-    nn.ReLU(),
-    nn.Linear(32, 4)
-)
+import torch
+import torch.nn as nn
+
+class PeliculasNeuralNetwork(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super(PeliculasNeuralNetwork, self).__init__()
+        self.layer1 = nn.Linear(input_dim, hidden_dim)
+        self.relu = nn.ReLU()
+        self.layer2 = nn.Linear(hidden_dim, hidden_dim)
+        self.output = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        out = self.layer1(x)
+        out = self.relu(out)
+        out = self.layer2(out)
+        out = self.relu(out)
+        out = self.output(out)
+        return out
+
+def evaluar(model, loader, criterio):
+    model.eval()
+    loss_total, aciertos, total = 0.0, 0, 0
+    todas_reales, todas_pred = [], []
+
+    with torch.no_grad():
+        for batch_X, batch_y in loader:
+            outputs = model(batch_X)
+            loss = criterio(outputs, batch_y)
+
+            predichas = outputs.argmax(dim=1)
+
+            loss_total += loss.item() * len(batch_y)
+            aciertos += (predichas == batch_y).sum().item()
+            total += len(batch_y)
+
+            todas_reales.extend(batch_y.tolist())
+            todas_pred.extend(predichas.tolist())
+
+    return loss_total / total, aciertos / total, todas_reales, todas_pred
 ```
 
-`Linear` combina las entradas con pesos y sesgos. `ReLU` introduce no
-linealidad y sustituye los valores negativos por cero. Las cuatro salidas
-son puntuaciones llamadas *logits*. Elegimos la clase con la mayor puntuación.
+#### 2.2.2. Datos del Entrenamiento
 
-## Cómo aprende
 
-Usamos `CrossEntropyLoss` y el optimizador Adam. La pérdida recibe los
-logits directamente: **no añadimos Softmax antes de CrossEntropyLoss**.
+{{< include resultados/resumen_baseline.qmd >}}
+
+**Evolución por Época**
+
+{{< include resultados/historial_baseline.qmd >}}
+
+#### 2.2.3. Reporte de Clasificación por Clase
+
+{{< include resultados/metricas_baseline.qmd >}}
+
+#### 2.2.4. Gráficos
+![Evolución de la pérdida y accuracy de validación durante las diez épocas.](graficos/baseline.png)
+
+1. Línea Roja Discontinua 🟥 — Pérdida de Entrenamiento (Train Loss)
+2. Línea Naranja Continua 🟧 — Pérdida de Validación (Val Loss)
+3. Línea Azul Continua 🟦 — Precisión de Validación (Val Accuracy %)
+
+![Métricas por categoría del modelo inicial, calculadas sobre validación.](graficos/metricas_baseline.png)
+
+
+### 2.3 Fase B: Resumen final del apartado
+¿Qué estamos viendo y haciendo?
+Hemos partido del conjunto de datos ya filtrado y pulcro de la fase previa. Una vez resueltos los problemas de nulos, formatos e incompatibilidades de tipos, tomamos esos datos empaquetados en lotes (train_loader y val_loader) para construir, entrenar y evaluar nuestro modelo baseline en PyTorch.
+
+El objetivo es establecer un punto de partida de rendimiento midiendo la precisión (accuracy) y la pérdida (loss) al intentar predecir la categoría de popularidad de una película a partir de sus 5 características cuantitativas.
+
+
+## 3. Fase C: Experimentación Sistemática y Búsqueda en Malla (Grid Search)
+
+Tras evaluar el modelo *Baseline*, implementamos una estrategia de **Grid Search** automatizada para evaluar el impacto de tres hiperparámetros clave en la capacidad de generalización de la red neuronal:
+1. **Profundidad de la red:** Evaluación de 1, 2 y 3 capas ocultas.
+2. **Tamaño del lote (*Batch Size*):** Comparativa entre lotes de 16, 32 y 64 muestras.
+3. **Tasa de aprendizaje (*Learning Rate*):** Variación de magnitud ($10^{-2}$, $10^{-3}$, $10^{-4}$).
+
+Cada configuración se repite con **tres semillas (42, 7 y 21)**, manteniendo fijas las películas de cada conjunto. Son **21 entrenamientos** de quince épocas, además del modelo inicial. Cambian los pesos iniciales y el orden de los lotes.
+
+Se conservan las siete configuraciones del grupo. La tabla compara la **accuracy media de validación al finalizar las quince épocas**; en caso de empate se prefiere la menor pérdida media de validación. El número de neuronas varía entre arquitecturas junto con la profundidad: no aislamos ambos efectos. Esta repetición no es validación cruzada.
+
+### 3.1 Código
+
+**Arquitectura Dinámica del Modelo**
+Este bloque define la red neuronal utilizando nn.Sequential. Permite instanciar modelos con cualquier número de capas ocultas y neuronas pasando simplemente una lista (por ejemplo, [128, 64, 32]).
 
 ```python
-optimizador.zero_grad()
-salida = modelo(x_lote)
-error = perdida(salida, y_lote)
-error.backward()
-optimizador.step()
+class PeliculasNeuralNetwork(nn.Module):
+    def __init__(self, input_dim, hidden_layers, output_dim, activation=nn.ReLU):
+        """
+        hidden_layers: lista de enteros, ej: [128, 64] -> 2 capas (128 y 64 neuronas)
+        """
+        super().__init__()
+        layers = []
+        in_dim = input_dim
+
+        # Construcción dinámica de capas ocultas
+        for h_dim in hidden_layers:
+            layers.append(nn.Linear(in_dim, h_dim))
+            layers.append(activation())
+            in_dim = h_dim
+
+        # Capa final de salida
+        layers.append(nn.Linear(in_dim, output_dim))
+        self.network = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.network(x)
+```
+* **¿Qué hace?** Construye la estructura interna de la red de forma modular según la configuración que le pase el Grid Search.
+* **Clave técnica:** Automatiza la conexión entre la dimensión de entrada, las capas ocultas intermedias y los *logits* de salida.
+
+---
+
+**Gestor Dinámico de Carga de Datos**
+
+Esta función empaqueta las características ($X$) y etiquetas ($y$) en estructuras de datos nativas de PyTorch (`TensorDataset` y `DataLoader`).
+
+
+```python
+def crear_dataloaders(X_train, y_train, X_val, y_val, batch_size):
+    """Recrea los DataLoaders según el batch_size indicado."""
+    train_dataset = TensorDataset(X_train, y_train)
+    val_dataset = TensorDataset(X_val, y_val)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+
+    return train_loader, val_loader
 ```
 
-1. Limpiamos los gradientes del lote anterior.
-2. Calculamos las puntuaciones y su error respecto a las clases reales.
-3. `backward()` calcula cómo influye cada peso en ese error.
-4. `step()` actualiza los pesos para intentar reducirlo.
+* **¿Qué hace?** Genera los iteradores de lotes (*batches*) adaptados al `batch_size` específico de cada experimento.
+* **Clave técnica:** Aplica `shuffle=True` en el conjunto de entrenamiento para evitar sesgos por orden de datos, manteniendo `shuffle=False` en validación para consistencia en las métricas.
 
-Una **época** recorre todas las películas de entrenamiento. Un **batch**
-es el grupo de películas utilizado para cada actualización. La **tasa de
-aprendizaje** controla el tamaño de esas actualizaciones.
+---
 
-## Plan de experimentación
+**Módulo de Evaluación en Inferencia**
 
-| Experimento | Capas ocultas | Batch | Learning rate |
-| --- | --- | --- | --- |
-| Exp_1 | 32 | 32 | 0.01 |
-| Exp_2 | 64 → 32 | 32 | 0.01 |
-| Exp_3 | 128 → 64 → 32 | 32 | 0.01 |
-| Exp_4 | 64 → 32 | 16 | 0.01 |
-| Exp_5 | 64 → 32 | 64 | 0.01 |
-| Exp_6 | 64 → 32 | 32 | 0.001 |
-| Exp_7 | 64 → 32 | 32 | 0.0001 |
-| Exp_8 | 64 | 32 | 0.01 |
+Esta función mide el rendimiento actual de la red sobre el conjunto de datos de validación sin alterar el estado ni los pesos del modelo.
 
-Las primeras siete configuraciones y el límite de 15 épocas proceden del
-código de `desarrollo`. Cada configuración se entrena con semillas
-42, 7 y 21. No es validación cruzada: repetimos la inicialización sobre la
-misma división. Entrenamos todas las épocas y conservamos los pesos de la
-menor pérdida de validación. El código completo está en
-`preparacion_hiperparametros_modulares.py`. El modelo inicial de dos capas
-de 64 se mantiene en `preparacion_datos_entrenamiento.py` y tiene 10 épocas.
 
-# Resultados y análisis
+```python
+def evaluar(model, loader, criterio):
+    """Evalúa el modelo sobre un DataLoader y devuelve loss y accuracy."""
+    model.eval()
+    loss_total, aciertos, total = 0.0, 0, 0
 
-{{< include resultados/resultados_modelos.qmd >}}
+    with torch.no_grad():
+        for batch_X, batch_y in loader:
+            outputs = model(batch_X)
+            loss = criterio(outputs, batch_y)
+            predichas = outputs.argmax(dim=1)
 
-# Limitaciones y mejoras
+            loss_total += loss.item() * len(batch_y)
+            aciertos += (predichas == batch_y).sum().item()
+            total += len(batch_y)
 
-- La muestra es pequeña, histórica y ya estaba seleccionada antes de recibirla.
-  No representa todas las películas ni la situación actual del cine.
-- Hemos verificado una fuente pública equivalente y reproducido las etiquetas,
-  pero no conservamos el historial completo de la preparación antigua.
-  El análisis está condicionado por esa selección y sus etiquetas heredadas.
-- Se usan variables posteriores al estreno y relacionadas con el indicador.
-  No afirmamos que el modelo pronostique futuros éxitos.
-- El umbral de 10.000 excluye películas independientes válidas. Es una
-  selección comercial heredada del proyecto y limita a qué películas se
-  pueden extrapolar los resultados. No hemos verificado todas las cifras.
-- El EDA describe la muestra completa. Los parámetros del preprocesado se
-  ajustan solo con entrenamiento; no hemos rediseñado el modelo tras observar
-  la prueba final.
-- Una sola partición limita la generalización. Como mejora probaríamos
-  validación cruzada y una separación temporal para evaluar películas de
-  años posteriores.
-- Se podría estudiar por separado qué ocurre al quitar el número de votos,
-  y comparar la clasificación posterior al estreno con otra basada únicamente
-  en información disponible antes del estreno.
+    return loss_total / total, aciertos / total
+```
+* **¿Qué hace?** Retorna el promedio exacto de la pérdida (`Loss`) y la precisión (`Accuracy`).
+* **Clave técnica:** `torch.no_grad()` bloquea el rastreo de operaciones en el *autograd*, reduciendo drásticamente el consumo de memoria RAM/VRAM y acelerando el cálculo.
 
-# Reproducción y referencias
 
-Desde esta carpeta:
+
+### 3.2 Tabla Comparativa de Experimentos
+
+{{< include resultados/comparacion.qmd >}}
+
+![Comparación de accuracy y pérdidas: medias de tres semillas. Las barras muestran la desviación de accuracy.](graficos/comparacion.png)
+
+### 3.3 Análisis e Interpretación de Resultados
+
+{{< include resultados/conclusiones.qmd >}}
+
+![Curvas completas de entrenamiento y validación de la configuración elegida.](graficos/curvas_ganador.png)
+
+Una pérdida de entrenamiento que baja mientras la de validación empeora de forma sostenida puede indicar sobreajuste. Una oscilación aislada no basta para afirmarlo. En estos experimentos utilizamos los pesos de la época quince, fijada de antemano.
+
+### 3.4. Evaluación final sobre prueba
+
+{{< include resultados/prueba.qmd >}}
+
+## 4. Limitaciones, reproducción y referencias
+
+La muestra recibida tiene películas de 1961 a 2015 y procede de una selección de casos completos. Las cinco entradas no recogen todos los factores relacionados con la popularidad. Las categorías ya venían definidas antes de la separación y son relativas a esa selección. Votos y nota media son posteriores al estreno y están relacionados con el indicador de popularidad.
+
+Utilizamos una sola partición y tres inicializaciones. La diferencia frente a otro modelo se refiere a esta prueba; no es una garantía para otras películas. Como mejoras futuras proponemos más datos, otras variables y comparar varias particiones, conservando una evaluación final independiente.
+
+El código completo está en los cuatro scripts del grupo. Para reproducir los resultados, ejecutar desde `redes neuronales`:
 
 ```bash
 python EDA.py
+python preparacion_datos_entrenamiento.py
 python preparacion_hiperparametros_modulares.py
+python generar_informe.py
 quarto render
 ```
 
-El informe se genera a partir de este `.qmd` y de los fragmentos que producen
-los scripts. Los bloques de código del informe son explicativos; la ejecución
-completa se hace con los comandos anteriores. Los archivos iniciales se
-conservan en `originales/` para poder revisar qué cambió.
+Los fragmentos de este documento se muestran para explicar el código. Las tablas y figuras se generan desde las ejecuciones de los scripts y se incorporan al HTML con Quarto. No se copian resultados antiguos a mano.
 
-- [Repositorio del equipo](https://github.com/William-glj/Redes-Neuronales-Team-RDTG-).
-- [Dataset público contrastado: TMDb Movies Dataset, Juzer Shakir](https://www.kaggle.com/datasets/juzershakir/tmdb-movies-dataset).
-- [Popularidad en TMDB](https://developer.themoviedb.org/docs/popularity-and-trending).
-- [Introducción oficial a PyTorch](https://docs.pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html).
-- [CrossEntropyLoss](https://docs.pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html).
-- [Separación y preprocesado sin fugas de información](https://scikit-learn.org/stable/common_pitfalls.html).
-- [Publicación de Quarto con GitHub Pages](https://quarto.org/docs/publishing/github-pages.html).
+**Datos:** [TMDb Movies Dataset, Juzer Shakir, Kaggle](https://www.kaggle.com/datasets/juzershakir/tmdb-movies-dataset). La fuente pública equivalente contiene 10.866 películas; hemos contrastado las 1.287 de la copia recibida, las columnas y las etiquetas. Esto no acredita el enlace de descarga original. La ficha indica licencia Unknown. Los detalles y hashes se conservan en `datos/fuente.md` y `datos/fuente_verificada.json`.
+
+**Herramientas:** [PyTorch](https://pytorch.org/), [pandas](https://pandas.pydata.org/), [NumPy](https://numpy.org/), [Matplotlib](https://matplotlib.org/), [scikit-learn](https://scikit-learn.org/) y [Quarto](https://quarto.org/).

@@ -1,71 +1,134 @@
-"""Modelo inicial de desarrollo: 5 entradas, dos capas de 64 y 10 épocas."""
-
-import json
-import pandas as pd
 import torch
-from torch import nn
-from torch.utils.data import DataLoader, TensorDataset
-from sklearn.metrics import classification_report
-from EDA import CARPETA, NOMBRES
-from preparacion_datos_base import preparar_datos
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
+import pandas as pd
+import json
+from pathlib import Path
+from sklearn.metrics import classification_report, confusion_matrix
 
+from preparacion_datos_base import train_loader, val_loader, y, label_encoder
 
+# ==========================================
+# DEFINICIÓN DE LA CLASE DE LA RED NEURONAL
+# ==========================================
 class PeliculasNeuralNetwork(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
-        super().__init__()
+        super(PeliculasNeuralNetwork, self).__init__()
         self.layer1 = nn.Linear(input_dim, hidden_dim)
         self.relu = nn.ReLU()
         self.layer2 = nn.Linear(hidden_dim, hidden_dim)
         self.output = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x):
-        out = self.relu(self.layer1(x))
-        out = self.relu(self.layer2(out))
-        return self.output(out)
+        out = self.layer1(x)
+        out = self.relu(out)
+        out = self.layer2(out)
+        out = self.relu(out)
+        out = self.output(out)
+        return out
 
 
-def ejecutar_baseline(entradas=None, objetivos=None):
-    if entradas is None:
-        entradas, objetivos, _, _ = preparar_datos()
-    torch.set_num_threads(1)
-    torch.manual_seed(42)
-    x_train = torch.tensor(entradas[0])
-    y_train = torch.tensor(objetivos[0])
-    x_val = torch.tensor(entradas[1])
-    y_val = torch.tensor(objetivos[1])
-    model = PeliculasNeuralNetwork(input_dim=5, hidden_dim=64, output_dim=4)
-    criterio = nn.CrossEntropyLoss()
-    optimizador = torch.optim.Adam(model.parameters(), lr=0.01)
-    train_loader = DataLoader(TensorDataset(x_train, y_train), batch_size=32, shuffle=True)
-    historial = []
-    for epoch in range(1, 11):
-        model.train()
-        for batch_X, batch_y in train_loader:
-            optimizador.zero_grad()
-            loss = criterio(model(batch_X), batch_y)
-            loss.backward()
-            optimizador.step()
-        model.eval()
-        with torch.no_grad():
-            salida_train = model(x_train)
-            salida_val = model(x_val)
-            historial.append({"epoca": epoch,
-                              "perdida_entreno": criterio(salida_train, y_train).item(),
-                              "perdida_validacion": criterio(salida_val, y_val).item(),
-                              "accuracy_entreno": (salida_train.argmax(1) == y_train).float().mean().item(),
-                              "accuracy_validacion": (salida_val.argmax(1) == y_val).float().mean().item()})
-    resultados = CARPETA / "resultados"
-    pd.DataFrame(historial).to_csv(resultados / "historial_baseline.csv", index=False)
-    reporte = classification_report(objetivos[1], salida_val.argmax(1).numpy(), labels=range(4),
-                                    target_names=NOMBRES, output_dict=True, zero_division=0)
-    pd.DataFrame(reporte).T.to_csv(resultados / "metricas_baseline_validacion.csv")
-    resumen = {"epocas": 10, "capas": [64, 64], "batch": 32, "lr": 0.01,
-               "accuracy_validacion": historial[-1]["accuracy_validacion"],
-               "f1_validacion": reporte["macro avg"]["f1-score"]}
-    (resultados / "baseline.json").write_text(json.dumps(resumen, indent=2), encoding="utf-8")
-    print(f"Modelo inicial · accuracy validación: {resumen['accuracy_validacion']:.1%}", flush=True)
-    return resumen
+# ==========================================
+# INICIALIZACIÓN
+# ==========================================
+torch.set_num_threads(1)
+torch.manual_seed(42)
+np.random.seed(42)
+CARPETA = Path(__file__).resolve().parent
+historial = []
+
+input_dim = 5
+hidden_dim = 64
+output_dim = len(np.unique(y))
+
+model = PeliculasNeuralNetwork(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim)
+
+criterio = nn.CrossEntropyLoss()
+optimizador = optim.Adam(model.parameters(), lr=0.01)
 
 
-if __name__ == "__main__":
-    ejecutar_baseline()
+# ==========================================
+# FUNCIÓN DE EVALUACIÓN
+# ==========================================
+def evaluar(model, loader, criterio):
+    model.eval()
+    loss_total, aciertos, total = 0.0, 0, 0
+    todas_reales, todas_pred = [], []
+
+    with torch.no_grad():
+        for batch_X, batch_y in loader:
+            outputs = model(batch_X)
+            loss = criterio(outputs, batch_y)
+
+            predichas = outputs.argmax(dim=1)
+
+            loss_total += loss.item() * len(batch_y)
+            aciertos += (predichas == batch_y).sum().item()
+            total += len(batch_y)
+
+            todas_reales.extend(batch_y.tolist())
+            todas_pred.extend(predichas.tolist())
+
+    return loss_total / total, aciertos / total, todas_reales, todas_pred
+
+
+# ==========================================
+# BUCLE DE ENTRENAMIENTO Y VALIDACIÓN
+# ==========================================
+print("=== ENTRENANDO MODELO INICIAL (BASELINE) ===")
+for epoch in range(10):
+    model.train()
+    loss_acumulada = 0.0
+
+    for batch_X, batch_y in train_loader:
+        outputs = model(batch_X)
+        loss = criterio(outputs, batch_y)
+
+        optimizador.zero_grad()
+        loss.backward()
+        optimizador.step()
+
+        loss_acumulada += loss.item() * len(batch_y)
+
+    loss_train = loss_acumulada / len(train_loader.dataset)
+    loss_val, acc_val, _, _ = evaluar(model, val_loader, criterio)
+
+    historial.append({'Época': epoch + 1, 'Loss Train': loss_train,
+                      'Loss Val': loss_val, 'Accuracy Val (%)': acc_val * 100})
+
+    print(f"Época {epoch+1:>2} | Loss train: {loss_train:.4f} | "
+          f"Loss val: {loss_val:.4f} | Accuracy val: {acc_val*100:.2f}%")
+
+# ==========================================
+# BLOQUE DE PRUEBA Y MÉTRICAS FINALES
+# ==========================================
+print("\n" + "="*50)
+print("RESULTADOS DE EVALUACIÓN DEL MODELO BASELINE")
+print("="*50)
+
+loss_val, acc_val, y_reales, y_predichas = evaluar(model, val_loader, criterio)
+
+# Obtener los nombres de las clases originales
+nombres_clases = [str(cls) for cls in label_encoder.classes_]
+todas_las_etiquetas = list(range(len(nombres_clases)))
+
+print(f"\nAccuracy Final en Validación: {acc_val * 100:.2f}%\n")
+print("Reporte de Clasificación por Clase:")
+print(classification_report(
+    y_reales,
+    y_predichas,
+    labels=todas_las_etiquetas,
+    target_names=nombres_clases,
+    zero_division=0
+))
+# Las tablas del informe se obtienen de esta ejecución, no se escriben a mano.
+resultados = CARPETA / 'resultados'
+pd.DataFrame(historial).to_csv(resultados / 'historial_baseline.csv', index=False)
+reporte = classification_report(y_reales, y_predichas, labels=todas_las_etiquetas,
+                                target_names=nombres_clases, output_dict=True, zero_division=0)
+pd.DataFrame(reporte).T.to_csv(resultados / 'metricas_baseline.csv')
+resumen = {'entrenamiento': len(train_loader.dataset), 'validacion': len(val_loader.dataset),
+           'epocas': 10, 'accuracy_validacion': acc_val, 'clases': nombres_clases}
+(resultados / 'baseline.json').write_text(json.dumps(resumen, indent=2, ensure_ascii=False), encoding='utf-8')
+torch.save(model.state_dict(), resultados / 'modelo_baseline.pt')

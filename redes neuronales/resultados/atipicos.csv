@@ -1,8 +1,6 @@
-variable,limite_inferior,limite_superior,atipicos
-budget,-67500000.0,152500000.0,82
-revenue,-254220752.0,496645948.0,120
-runtime,61.0,157.0,29
-vote_count,-1327.5,2694.5,122
-vote_average,4.3,8.3,13
-release_year,1996.0,2020.0,90
-popularity,-1.529,4.345,98
+Variable,Atípicos IQR
+budget,82
+revenue,120
+runtime,29
+vote_count,122
+vote_average,13

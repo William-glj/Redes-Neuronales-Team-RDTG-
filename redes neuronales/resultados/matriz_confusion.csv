@@ -1,5 +1,5 @@
-,Baja,Media,Media-alta,Alta
-Baja,32,13,2,0
-Media,15,21,11,1
-Media-alta,5,12,22,9
-Alta,0,0,7,42
+,High,Low,Medium,Moderately High
+High,39,0,1,9
+Low,0,36,8,3
+Medium,2,12,22,12
+Moderately High,6,0,10,32

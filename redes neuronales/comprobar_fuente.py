@@ -11,7 +11,8 @@ import sys
 import zipfile
 import numpy as np
 import pandas as pd
-from EDA import CARPETA, CATEGORIAS
+CARPETA = Path(__file__).resolve().parent
+CATEGORIAS = ["Low", "Medium", "Moderately High", "High"]
 
 
 def comprobar_fuente(ruta_zip):
@@ -20,7 +21,7 @@ def comprobar_fuente(ruta_zip):
         with archivo.open("tmdb_movies_data.csv") as csv:
             publico = pd.read_csv(csv)
 
-    recibido = pd.read_csv(CARPETA / "datos/peliculas_original.csv")
+    recibido = pd.read_csv(CARPETA / "TMBD Movie Dataset.csv")
     seleccion = publico.copy()
     seleccion[["budget", "revenue"]] = seleccion[["budget", "revenue"]].replace(0, np.nan)
     seleccion = seleccion.dropna().drop_duplicates(subset="id")
@@ -74,7 +75,7 @@ def comprobar_fuente(ruta_zip):
         "licencia_indicada_en_la_ficha": "Unknown",
         "sha256_csv_publico": hashlib.sha256(contenido).hexdigest(),
         "sha256_csv_recibido": hashlib.sha256(
-            (CARPETA / "datos/peliculas_original.csv").read_bytes()).hexdigest(),
+            (CARPETA / "TMBD Movie Dataset.csv").read_bytes()).hexdigest(),
         "filas_publicas": len(publico),
         "filas_seleccion_verificada": len(seleccion),
         "columnas_verificadas": verificadas,

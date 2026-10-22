@@ -1,0 +1,11 @@
+::: {.callout-note}
+**Resumen de Datos**
+
+- Registros de entrenamiento: **893**.
+- Registros de validación: **191**.
+- Registros de prueba reservados: **192**.
+- Épocas del modelo inicial: **10**.
+- Accuracy final en validación: **62.30 %**.
+:::
+
+Las cifras siguientes se generan desde los CSV de esta ejecución. No corresponden a la antigua partición 80/20.

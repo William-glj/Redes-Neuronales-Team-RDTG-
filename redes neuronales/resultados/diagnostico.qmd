@@ -1,0 +1,38 @@
+#### Valores nulos
+
+| Columna | Nulos recibidos |
+| --- | --- |
+| Unnamed: 0 | 0 |
+| id | 0 |
+| imdb_id | 0 |
+| popularity | 0 |
+| budget | 0 |
+| revenue | 0 |
+| original_title | 0 |
+| cast | 0 |
+| homepage | 0 |
+| director | 0 |
+| tagline | 0 |
+| keywords | 0 |
+| overview | 0 |
+| runtime | 0 |
+| genres | 0 |
+| production_companies | 0 |
+| release_date | 0 |
+| vote_count | 0 |
+| vote_average | 0 |
+| release_year | 0 |
+| budget_adj | 0 |
+| revenue_adj | 0 |
+| profit | 0 |
+| popularity_level | 1 |
+
+#### Valores atípicos
+
+| Variable | Atípicos IQR |
+| --- | --- |
+| budget | 82 |
+| revenue | 120 |
+| runtime | 29 |
+| vote_count | 122 |
+| vote_average | 13 |

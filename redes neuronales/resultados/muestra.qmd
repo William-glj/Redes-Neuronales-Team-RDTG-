@@ -1,0 +1,6 @@
+| id | original_title | release_date | budget | revenue | runtime |
+| --- | --- | --- | --- | --- | --- |
+| 135397 | Jurassic World | 2015-06-09 | 150000000 | 1513528810 | 124 |
+| 76341 | Mad Max: Fury Road | 2015-05-13 | 150000000 | 378436354 | 120 |
+| 262500 | Insurgent | 2015-03-18 | 110000000 | 295238201 | 119 |
+| 140607 | Star Wars: The Force Awakens | 2015-12-15 | 200000000 | 2068178225 | 136 |

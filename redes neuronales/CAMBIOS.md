@@ -1,66 +1,35 @@
-# Revisión a partir de desarrollo
+# Revisión desde 0857c4b
 
-Base revisada: rama `desarrollo`, commit `0857c4b05a69e11ffdf3df62ee57eaf9d91ebad2`.
-Se conserva una copia íntegra del ZIP de esa revisión en `originales/desarrollo/`.
+## Base conservada
 
-## Qué se conserva
+Se han extraído directamente los archivos de `0857c4b`: tema de cine, CSV recibido,
+cuatro scripts, clases, funciones, cinco entradas, modelo inicial 64–64 y siete
+configuraciones. El informe vuelve a partir de la redacción y los apartados del grupo:
+Fase A, Fase B y Fase C. Se mantienen sus explicaciones de neuronas, DataLoader,
+evaluación y comparación de hiperparámetros.
 
-- Cine, CSV de partida y clasificación de `popularity_level`.
-- Umbral comercial de presupuesto y recaudación superiores a 10.000.
-- Cinco variables del equipo: presupuesto, duración, votos, nota media y año.
-- Nombres de los tres scripts de preparación/entrenamiento y `presentacion.qmd`.
-- Modelo inicial de dos capas de 64, lote 32, tasa 0,01 y diez épocas.
-- Las siete configuraciones originales de capas, lotes y tasas, con 15 épocas.
+## Correcciones y ampliaciones
 
-## Qué se corrige o añade
+1. Código y recursos dentro de `redes neuronales`, manteniendo los nombres originales.
+2. Se excluye una etiqueta ausente antes de LabelEncoder para evitar una clase `nan`.
+3. Se contrastan la fuente pública y doce fechas con el siglo incorrecto. El año de entrada ya era correcto.
+4. Se añaden tablas de nulos, IQR y cinco gráficos al EDA. Los extremos válidos se conservan.
+5. Se reserva una prueba final: aproximadamente 70/15/15, con estratificación y semilla 42.
+6. Se mantiene StandardScaler ajustado solo con entrenamiento. No se añaden logaritmos a las entradas.
+7. Se repiten las siete configuraciones originales con semillas 42, 7 y 21: 21 entrenamientos.
+8. Se elige por accuracy media de validación al terminar las quince épocas; desempate por menor pérdida media.
+9. Se guardan pesos, curvas, métricas y predicciones. La prueba se usa después de elegir.
+10. Las salidas escritas a mano del informe se sustituyen por tablas y figuras de la ejecución.
+11. Se corrigen la justificación de la red, el orden real de LabelEncoder y conclusiones causales no demostradas.
+12. Se añaden limitaciones, prueba independiente, referencias sencillas y pasos para reproducir.
 
-1. Se elimina la etiqueta ausente antes de codificar las clases. `astype(str)`
-   la convertía en `"nan"`, que podía entrar como una quinta categoría.
-2. Se explicita el orden Baja, Media, Media-alta y Alta. El orden alfabético
-   de LabelEncoder no coincidía con algunos ejemplos explicados en el informe.
-3. Se distingue selección comercial de dato incorrecto. El umbral excluye
-   películas que pueden ser válidas y limita la representatividad.
-4. Se añaden estadísticas de nulos, IQR y cinco figuras del EDA.
-5. Presupuesto y votos se transforman con logaritmo antes de StandardScaler.
-   Medianas y escalado se ajustan exclusivamente con entrenamiento.
-6. Se separan entrenamiento, validación y prueba final, manteniendo las
-   proporciones de clases. El modelo inicial se evalúa solo en validación.
-7. Se añade Exp_8, una capa de 64, para comparar su anchura con Exp_1, de 32.
-   Las ocho configuraciones se repiten con tres semillas: 24 entrenamientos.
-8. Se selecciona por F1 macro medio de validación y se recupera la época de
-   menor pérdida de validación. Prueba se consulta después de la elección.
-9. Se guardan resultados, predicciones y pesos. Las gráficas y tablas se leen
-   de esas salidas; no se mantienen las cifras escritas a mano de la versión anterior.
-10. Se corrigen ejemplos incompatibles con el periodo del CSV y afirmaciones
-    que daban por demostrada la superioridad de una red sin compararla.
-11. Se añade una guía oral para cuatro personas y se organiza la entrega dentro
-    de `redes neuronales`, como exige el enunciado.
+## Cifras actuales
 
-Los porcentajes de esta revisión no se comparan directamente con los de la
-presentación anterior: cambian el reparto y la preparación de los datos.
-Tampoco deben mezclarse con el primer ensayo local basado en la copia de main.
+- 1.287 películas recibidas; 1.276 después de limpiar.
+- 893 entrenamiento, 191 validación, 192 prueba.
+- Modelo inicial: 62,30 % de accuracy de validación, una semilla.
+- Exp_1 seleccionada entre las siete: 61,78 % de accuracy media de validación.
+- Prueba de Exp_1: 67,53 % de accuracy media y F1 macro 0,673.
 
-## Cierre local para la defensa del 23 de octubre
-
-- Se contrasta TMDb Movies Dataset de Juzer Shakir en Kaggle: 1.287
-  identificadores reproducidos a partir de los 10.866 registros públicos.
-- `comprobar_fuente.py` verifica las 21 columnas con diferencias documentadas,
-  reproduce `profit` y las categorías y guarda hashes y cortes en JSON.
-- Se encuentran 12 fechas con el siglo incorrecto. Se corrigen solo en el
-  CSV limpio usando el año contrastado, que ya era correcto en las entradas.
-- Se añaden al informe dos aciertos y dos errores reales de la prueba,
-  extraídos automáticamente de las predicciones de la semilla 42.
-- Se completa la guía con cifras y guion para los cuatro. Se prepara
-  `ANTES_DE_PRESENTAR.md` para el ensayo y la entrega.
-- La primera revisión está subida en `2f5399d`. Su ejecución de Actions hizo
-  correctamente EDA, entrenamiento y render, con las mismas métricas finales
-  que en local; el despliegue quedó bloqueado por la política de `github-pages`.
-
-## Pendiente por el equipo
-
-- Revisar la nueva preparación local y comprender las cuatro intervenciones.
-- Completar la configuración de publicación con un administrador.
-- Registro de integrantes/repositorio en Loop.
-- Publicación y comprobación de la URL final; exposición de los cuatro integrantes.
-
-La rama de destino para la subida es `desarrollo` en minúsculas.
+La evaluación y los resultados son propios de esta revisión. No deben mezclarse
+con los del informe antiguo ni con revisiones que utilizaran otra preparación.

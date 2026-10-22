@@ -6,7 +6,6 @@ __pycache__/
 **/.quarto/
 **/_site/
 **/.ipynb_checkpoints/
-informe.html
 *_files/
 *.deb
 quarto.deb

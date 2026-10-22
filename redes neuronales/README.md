@@ -1,144 +1,62 @@
-# Trabajo 1 · Cine y redes neuronales
+# Trabajo 1: Cine y redes neuronales
 
 Equipo: José Ramón, Guillermo, Dylan y Tomás. 2.º DAW.
 
-## Para preparar la exposición de mañana
+Esta revisión parte de `0857c4b`. Conserva los cuatro scripts, sus clases y funciones,
+las siete configuraciones y los apartados 1, 2 y 3 del informe del grupo. Los archivos
+se colocan dentro de `redes neuronales`, como pide el enunciado.
 
-1. Abrir `presentacion.html`: informe completo con recursos incrustados, para leerlo sin ejecutar Python.
-2. Repartir `GUIA_EXPOSICION.md`: incluye resultados concretos, ejemplos y guion para los cuatro.
-3. Revisar `ANTES_DE_PRESENTAR.md`: ensayo, apertura local y publicación pendiente.
+## Abrir el informe
 
-## Estado de esta versión
+Abrir `presentacion.html` con Chrome, Edge o Safari. Incluye las figuras y puede leerse
+sin ejecutar Python. La fuente de Quarto sigue siendo `presentacion.qmd`.
 
-La base de esta revisión es la rama **`desarrollo`**, commit
-`0857c4b05a69e11ffdf3df62ee57eaf9d91ebad2`. La copia recibida inicialmente
-era de `main`, que tenía menos archivos. La versión original de desarrollo
-se conserva íntegra en `originales/desarrollo/`.
+## Ejecutar
 
-Se mantienen las cinco variables y las siete configuraciones del equipo.
-Se añade una octava comparación de anchura, tres semillas y una prueba final.
-La muestra contiene 1.276 películas después del umbral comercial heredado
-y de eliminar una categoría ausente: 893 de entrenamiento, 191 de validación
-y 192 de prueba. Se han ejecutado el modelo inicial y los 24 entrenamientos,
-y se ha generado el HTML con Quarto. Los pesos guardados reproducen las
-predicciones y no hay películas compartidas entre los conjuntos.
-
-El entrenamiento y los gráficos usan las dependencias de `requirements.txt`.
-El informe indica explícitamente si no hay métricas de una ejecución completa.
-Se ha contrastado una fuente pública en Kaggle, reproducido la selección de
-1.287 identificadores y las etiquetas, y documentado las diferencias en
-`datos/fuente.md`. El EDA corrige 12 fechas con el siglo incorrecto; las cinco
-entradas de la red no cambian. Se conserva el CSV recibido sin modificar.
-
-## Instalación en macOS
-
-Abrir Terminal en la raíz del proyecto:
+Desde la raíz del repositorio, activar un entorno con las dependencias de `requirements.txt`.
+Después, dentro de `redes neuronales`:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r "redes neuronales/requirements.txt"
-```
-
-Si no está instalado Quarto:
-
-```bash
-brew install --cask quarto
-```
-
-También está el instalador oficial: https://quarto.org/docs/get-started/
-
-Comprobar la instalación:
-
-```bash
-python -c "import torch, pandas, numpy, matplotlib, sklearn; print('PyTorch:', torch.__version__)"
-quarto --version
-```
-
-Si no se encuentra una distribución compatible con la versión de Python,
-usar Python 3.12 en un entorno nuevo. No es necesario reinstalar el sistema
-ni modificar el Python global. GitHub Actions usa Python 3.12 y Colab es otra
-alternativa si la instalación local falla.
-
-## Ejecutar el proyecto
-
-Con el entorno virtual activado, desde la raíz:
-
-```bash
-cd "redes neuronales"
 python EDA.py
+python preparacion_datos_entrenamiento.py
 python preparacion_hiperparametros_modulares.py
+python generar_informe.py
 quarto render
-quarto preview
 ```
 
-`preparacion_hiperparametros_modulares.py` ejecuta el modelo inicial y 24
-entrenamientos: ocho configuraciones, tres semillas cada una. Usa CPU;
-no necesita una tarjeta gráfica. La duración
-depende del equipo. Imprime el resultado de cada entrenamiento al terminarlo.
+El último comando genera `_site/index.html`. Para actualizar la copia de exposición,
+volver a copiar ese HTML a `presentacion.html`.
 
-El HTML queda en `_site/index.html`. Abrirlo con Quarto o con el navegador.
-El HTML incluye las figuras y recursos para poder guardarlo como copia local
-de la exposición. No sustituye la URL pública que exige la entrega.
+Las versiones usadas están en `requirements.txt`. No hace falta GPU. Las tablas se generan
+con Python y se incorporan a Quarto; no se necesita Jupyter para renderizar este informe.
 
-Si se interrumpe el entrenamiento, volver a ejecutarlo completo. No mezclar
-CSV de distintas ejecuciones. Tras cambiar los datos o el código, repetir
-EDA, entrenamiento y render en ese orden.
+## Archivos del grupo
 
-## Archivos principales
+- `EDA.py`: limpieza, diagnóstico y cinco gráficos del EDA.
+- `preparacion_datos_base.py`: cinco entradas, LabelEncoder, separación y StandardScaler.
+- `preparacion_datos_entrenamiento.py`: modelo inicial 64–64, diez épocas.
+- `preparacion_hiperparametros_modulares.py`: las siete configuraciones y sus tres semillas.
+- `presentacion.qmd`: informe con la estructura y las explicaciones del grupo.
+- `TMBD Movie Dataset.csv`: archivo recibido, conservado sin modificar.
+- `IMBD_Movie_Dataset_limpio.csv`: salida del EDA.
+- `generar_informe.py`: tablas y figuras a partir de los resultados guardados.
+- `resultados/` y `graficos/`: evidencias de las ejecuciones.
+- `datos/fuente.md`: procedencia y comprobación de la fuente pública.
 
-| Archivo o carpeta | Función |
-| --- | --- |
-| `EDA.py` | Limpieza, tablas descriptivas y cinco gráficos del EDA. |
-| `preparacion_datos_base.py` | Cinco entradas, separación y normalización sin mezclar conjuntos. |
-| `preparacion_datos_entrenamiento.py` | Modelo inicial: dos capas de 64 y diez épocas. |
-| `preparacion_hiperparametros_modulares.py` | Ocho configuraciones, tres semillas y evaluación final. |
-| `generar_informe.py` | Figuras y texto de resultados a partir de las métricas reales. |
-| `comprobar_fuente.py` | Comparación opcional con el ZIP público de Kaggle. |
-| `presentacion.qmd` y `_quarto.yml` | Fuente y configuración del informe Quarto. |
-| `datos/` | CSV recibido, CSV limpio y notas de procedencia. |
-| `originales/` | Script y CSV limpio de la versión inicial, sin ejecutar. |
-| `resultados/` | Tablas, divisiones, predicciones, curvas numéricas y pesos entrenados. |
-| `graficos/` | Imágenes generadas con matplotlib. |
-| `GUIA_EXPOSICION.md` | Reparto, explicación del código y preguntas de defensa. |
-| `ANTES_DE_PRESENTAR.md` | Preparación local, ensayo y pasos de entrega pendientes. |
-| `Ejecutar_en_Colab.ipynb` | Alternativa de ejecución, después de subir esta versión al repo. |
+## Resultado de esta revisión
 
-`--sin-graficos` permite ejecutar la limpieza sin matplotlib, pero no genera
-las figuras requeridas para la entrega. No es el modo de ejecución final.
+Se elige Exp_1 dentro de la rejilla: una capa oculta de 32 neuronas, lote 32 y tasa 0,01.
+Su accuracy media es 61,78 % en validación y 67,53 % en prueba; F1 macro de prueba 0,673.
+La regresión logística obtiene 63,54 % en la misma prueba. Se reserva prueba antes de entrenar
+para no utilizarla al elegir la configuración. Las cifras antiguas corresponden a otro protocolo.
 
-## Publicar con GitHub Pages
+Consultar `CAMBIOS.md` para las modificaciones concretas desde `0857c4b` y
+`GUIA_EXPOSICION.md` para repartir la defensa.
 
-La raíz incluye `.github/workflows/informe.yml`. Es la excepción de ubicación
-necesaria para que GitHub encuentre la configuración de publicación; el
-código, datos y fuente del informe están dentro de `redes neuronales`.
+## Publicación
 
-1. Trabajar sobre la clonación de `desarrollo` y subir los cambios a esa rama.
-   La primera revisión se subió en `2f5399d`. Incluir `.github/` y conservar
-   las copias de `originales/desarrollo/`. No subir `.venv/` ni `_site/`.
-2. En el repositorio, abrir **Settings → Pages** y elegir **GitHub Actions**
-   como fuente de publicación.
-3. En **Actions**, abrir **Informe de redes neuronales** y ejecutar **Run workflow**
-   en `desarrollo` si la subida ya se hizo antes de activar Pages.
-   Esta entrega se sube a la rama `desarrollo`, en minúsculas.
-4. El proceso instala dependencias, genera EDA, entrena, renderiza Quarto y publica.
-   Si el entorno `github-pages` tiene restricciones de ramas, debe permitir
-   `desarrollo` para completar el despliegue.
-5. Cuando termine en verde, abrir la URL mostrada por el despliegue y comprobar
-   que aparecen los gráficos, la tabla de ocho configuraciones y la matriz de confusión.
-6. Publicar ESA URL en Loop. El enlace al repositorio es un enlace diferente.
-
-El workflow también guarda un ZIP de resultados como artefacto descargable
-desde la ejecución de Actions. No hace commits automáticos ni modifica el repo.
-Un fallo se debe revisar en el paso que aparezca en rojo; no dar la publicación
-por hecha solo por haber subido los archivos.
-
-## Antes de entregar
-
-- Consultar la fuente contrastada y `datos/fuente_verificada.json`.
-- Verificar que el entrenamiento completo termina sin errores.
-- Leer las conclusiones que se generen y contrastarlas con las tablas.
-- Revisar la web publicada desde otro dispositivo.
-- Comprobar el registro de los cuatro integrantes y del repositorio en Loop.
-- Publicar la URL del informe antes del límite y ensayar las cuatro intervenciones.
+Los cambios se suben a `desarrollo`. El workflow de `.github/workflows/informe.yml`
+ejecuta los scripts y publica el informe con GitHub Pages. Un administrador debe elegir
+GitHub Actions como fuente de Pages y permitir `desarrollo` en el entorno `github-pages`.
+Una subida al repositorio no demuestra que el despliegue haya terminado.
+La entrega exige comprobar la web y publicar su URL en Loop.

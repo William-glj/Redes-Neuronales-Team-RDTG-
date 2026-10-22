@@ -1,0 +1,8 @@
+Partimos de **1287 películas** y quedan **1276**: se excluyen diez por el filtro comercial y una sin categoría. No se encontraron duplicados por ID. Se corrigen doce fechas con el siglo incorrecto, conservando el año de estreno ya contrastado.
+
+| popularity_level | Películas |
+| --- | --- |
+| Low | 314 |
+| Medium | 319 |
+| Moderately High | 321 |
+| High | 322 |

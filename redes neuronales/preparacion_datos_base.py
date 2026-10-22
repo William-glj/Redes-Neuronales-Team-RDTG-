@@ -1,60 +1,66 @@
-"""Preparación de las cinco variables del proyecto de desarrollo.
-
-Mantenemos el planteamiento del equipo y añadimos una prueba final independiente.
-"""
-
-import numpy as np
 import pandas as pd
+import numpy as np
+import torch
+from torch.utils.data import TensorDataset, DataLoader
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from EDA import CARPETA, CATEGORIAS
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from pathlib import Path
 
-FEATURE_COLS = ["budget", "runtime", "vote_count", "vote_average", "release_year"]
+CARPETA = Path(__file__).resolve().parent
+
+# 1. Cargar el dataset limpio generado en el EDA
+df = pd.read_csv(CARPETA / 'IMBD_Movie_Dataset_limpio.csv')
+
+# 2. Seleccionar las variables explicativas (X) y la variable objetivo (Y)
+feature_cols = ['budget', 'runtime', 'vote_count', 'vote_average', 'release_year']
+X = df[feature_cols].values
+
+# Convertir la variable categórica 'popularity_level' a etiquetas numéricas enteras
+label_encoder = LabelEncoder()
+if df['popularity_level'].isna().any():
+    raise ValueError('Hay etiquetas ausentes. Ejecutar EDA.py primero.')
+y = label_encoder.fit_transform(df['popularity_level'])
+
+# 3. Reservar prueba final y separar entrenamiento y validación (70/15/15).
+indices = np.arange(len(df))
+idx_train, idx_reserva = train_test_split(indices, test_size=0.30, random_state=42, stratify=y)
+idx_val, idx_test = train_test_split(idx_reserva, test_size=0.50, random_state=42, stratify=y[idx_reserva])
+X_train, X_val, X_test = X[idx_train], X[idx_val], X[idx_test]
+y_train, y_val, y_test = y[idx_train], y[idx_val], y[idx_test]
+
+# 4. Normalizar los datos numéricos (media 0 y desviación típica 1)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_val = scaler.transform(X_val)
+X_test = scaler.transform(X_test)
+
+# 5. Convertir los arrays de NumPy a tensores de PyTorch
+X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+y_train_tensor = torch.tensor(y_train, dtype=torch.long)  # 'long' para clases categóricas
+
+X_val_tensor = torch.tensor(X_val, dtype=torch.float32)
+y_val_tensor = torch.tensor(y_val, dtype=torch.long)
+
+# 6. Crear los DataLoaders para agrupar los datos en lotes (batches)
+train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
+val_dataset = TensorDataset(X_val_tensor, y_val_tensor)
+
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+
+print("¡Preparación de datos completada con éxito!")
+print(f"Lotes de entrenamiento listos: {len(train_loader)} (Total de registros: {len(X_train_tensor)})")
+print(f"Lotes de validación listos: {len(val_loader)} (Total de registros: {len(X_val_tensor)})")
 
 
-def preparar_datos():
-    df = pd.read_csv(CARPETA / "datos/peliculas_limpias.csv")
-    # No hacemos astype(str) sobre las etiquetas: convertiría un nulo en "nan".
-    df["objetivo"] = df["popularity_level"].map({c: i for i, c in enumerate(CATEGORIAS)})
-    if df["objetivo"].isna().any():
-        raise ValueError("Quedan categorías sin limpiar. Ejecutar EDA.py primero.")
 
-    entreno, reserva = train_test_split(df, test_size=0.30, random_state=42,
-                                       stratify=df["objetivo"])
-    validacion, prueba = train_test_split(reserva, test_size=0.50, random_state=42,
-                                         stratify=reserva["objetivo"])
-    partes = [entreno, validacion, prueba]
-    medianas = entreno[FEATURE_COLS].median()
-    if medianas.isna().any():
-        raise ValueError("Hay una variable sin datos en entrenamiento.")
 
-    valores_numericos = []
-    for parte in partes:
-        valores = parte[FEATURE_COLS].fillna(medianas).copy()
-        for columna in ["budget", "vote_count"]:
-            valores[columna] = np.log1p(valores[columna])
-        valores_numericos.append(valores)
-
-    scaler = StandardScaler()
-    x_entreno = scaler.fit_transform(valores_numericos[0]).astype(np.float32)
-    x_val = scaler.transform(valores_numericos[1]).astype(np.float32)
-    x_prueba = scaler.transform(valores_numericos[2]).astype(np.float32)
-    entradas = [x_entreno, x_val, x_prueba]
-    objetivos = [parte["objetivo"].to_numpy(dtype=np.int64) for parte in partes]
-    if not all(np.isfinite(x).all() for x in entradas):
-        raise ValueError("Hay entradas no finitas.")
-
-    resultados = CARPETA / "resultados"
-    resultados.mkdir(exist_ok=True)
-    particiones = []
-    for nombre, parte in zip(["entrenamiento", "validacion", "prueba"], partes):
-        filas = parte[["id", "original_title", "popularity_level"]].copy()
-        filas["conjunto"] = nombre
-        particiones.append(filas)
-    pd.concat(particiones).to_csv(resultados / "particiones.csv", index=False)
-    pd.DataFrame({"variable": FEATURE_COLS, "mediana": medianas.values,
-                  "media_transformada": scaler.mean_,
-                  "desviacion_transformada": scaler.scale_}).to_csv(
-                      resultados / "normalizacion.csv", index=False)
-    pd.Series(FEATURE_COLS, name="entrada").to_csv(resultados / "variables_entrada.csv", index=False)
-    return entradas, objetivos, partes, FEATURE_COLS
+# Guardamos la separación para comprobar que no se repiten películas.
+partes = []
+for nombre, indices_parte in [('entrenamiento', idx_train), ('validacion', idx_val), ('prueba', idx_test)]:
+    parte = df.iloc[indices_parte][['id', 'original_title', 'popularity_level']].copy()
+    parte['conjunto'] = nombre
+    partes.append(parte)
+pd.concat(partes).to_csv(CARPETA / 'resultados/particiones.csv', index=False)
+pd.DataFrame({'Variable': feature_cols, 'Media entrenamiento': scaler.mean_,
+              'Desviación entrenamiento': scaler.scale_}).to_csv(CARPETA / 'resultados/normalizacion.csv', index=False)

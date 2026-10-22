@@ -1,109 +1,44 @@
-"""Compara ocho configuraciones del equipo de PyTorch sin usar prueba para elegir.
-
-Ejecutar después de EDA.py: python preparacion_hiperparametros_modulares.py
-"""
-
-import copy
-import json
-import platform
 import time
-import numpy as np
-import pandas as pd
 import torch
-from torch import nn
+import torch.nn as nn
+import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
+import pandas as pd
+import numpy as np
+import json
+from pathlib import Path
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
-from EDA import CARPETA, CATEGORIAS, NOMBRES, marcar_entrenamiento_pendiente
-from preparacion_datos_base import preparar_datos
 
-EPOCAS = 15
+# Importar los datos desde tu archivo base
+from preparacion_datos_base import X_train, y_train, X_val, y_val, X_test, y_test, df, idx_test, label_encoder
+
+CARPETA = Path(__file__).resolve().parent
+RESULTADOS = CARPETA / "resultados"
 SEMILLAS = [42, 7, 21]
-EXPERIMENTOS = [
-    {
-        "nombre": "Exp_1",
-        "capas": [
-            32
-        ],
-        "batch": 32,
-        "lr": 0.01
-    },
-    {
-        "nombre": "Exp_2",
-        "capas": [
-            64,
-            32
-        ],
-        "batch": 32,
-        "lr": 0.01
-    },
-    {
-        "nombre": "Exp_3",
-        "capas": [
-            128,
-            64,
-            32
-        ],
-        "batch": 32,
-        "lr": 0.01
-    },
-    {
-        "nombre": "Exp_4",
-        "capas": [
-            64,
-            32
-        ],
-        "batch": 16,
-        "lr": 0.01
-    },
-    {
-        "nombre": "Exp_5",
-        "capas": [
-            64,
-            32
-        ],
-        "batch": 64,
-        "lr": 0.01
-    },
-    {
-        "nombre": "Exp_6",
-        "capas": [
-            64,
-            32
-        ],
-        "batch": 32,
-        "lr": 0.001
-    },
-    {
-        "nombre": "Exp_7",
-        "capas": [
-            64,
-            32
-        ],
-        "batch": 32,
-        "lr": 0.0001
-    },
-    {
-        "nombre": "Exp_8",
-        "capas": [
-            64
-        ],
-        "batch": 32,
-        "lr": 0.01
-    }
-]
+torch.set_num_threads(1)
+(RESULTADOS / "modelos").mkdir(exist_ok=True)
 
 
+# ==============================================================================
+# 1. ARQUITECTURA FLEXIBLE DE RED NEURONAL
+# ==============================================================================
 class PeliculasNeuralNetwork(nn.Module):
-    # Conservamos la arquitectura modular que ya tenía la rama desarrollo.
-    def __init__(self, input_dim, hidden_layers, output_dim):
+    def __init__(self, input_dim, hidden_layers, output_dim, activation=nn.ReLU):
+        """
+        hidden_layers: lista de enteros, ej: [128, 64] -> 2 capas (128 y 64 neuronas)
+        """
         super().__init__()
         layers = []
         in_dim = input_dim
+
+        # Construcción dinámica de capas ocultas
         for h_dim in hidden_layers:
             layers.append(nn.Linear(in_dim, h_dim))
-            layers.append(nn.ReLU())
+            layers.append(activation())
             in_dim = h_dim
+
+        # Capa final de salida
         layers.append(nn.Linear(in_dim, output_dim))
         self.network = nn.Sequential(*layers)
 
@@ -111,180 +46,228 @@ class PeliculasNeuralNetwork(nn.Module):
         return self.network(x)
 
 
-def construir_red(entradas, ocultas):
-    return PeliculasNeuralNetwork(entradas, ocultas, 4)
+# ==============================================================================
+# 2. FUNCIONES AUXILIARES: CREACIÓN DE LOADERS Y EVALUACIÓN
+# ==============================================================================
+def crear_dataloaders(X_train, y_train, X_val, y_val, batch_size):
+    """Recrea los DataLoaders según el batch_size indicado."""
+    train_dataset = TensorDataset(X_train, y_train)
+    val_dataset = TensorDataset(X_val, y_val)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+
+    return train_loader, val_loader
 
 
-def entrenar(configuracion, semilla, x_entreno, y_entreno, x_val, y_val):
-    torch.manual_seed(semilla)
-    np.random.seed(semilla)
-    modelo = construir_red(x_entreno.shape[1], configuracion["capas"])
-    perdida = nn.CrossEntropyLoss()
-    optimizador = torch.optim.Adam(modelo.parameters(), lr=configuracion["lr"])
-    datos = TensorDataset(x_entreno, y_entreno)
-    lotes = DataLoader(datos, batch_size=configuracion["batch"], shuffle=True)
-    historial = []
-    mejor_perdida = float("inf")
-    mejor_estado = None
-    mejor_epoca = 0
-    inicio = time.perf_counter()
+def evaluar(model, loader, criterio):
+    """Evalúa el modelo sobre un DataLoader y devuelve loss y accuracy."""
+    model.eval()
+    loss_total, aciertos, total = 0.0, 0, 0
 
-    for epoca in range(1, EPOCAS + 1):
-        modelo.train()
-        for x_lote, y_lote in lotes:
-            optimizador.zero_grad()
-            salida = modelo(x_lote)
-            error = perdida(salida, y_lote)
-            error.backward()
-            optimizador.step()
-
-        modelo.eval()
-        with torch.no_grad():
-            salida_entreno = modelo(x_entreno)
-            salida_val = modelo(x_val)
-            error_entreno = perdida(salida_entreno, y_entreno).item()
-            error_val = perdida(salida_val, y_val).item()
-            acierto_entreno = (salida_entreno.argmax(1) == y_entreno).float().mean().item()
-            acierto_val = (salida_val.argmax(1) == y_val).float().mean().item()
-
-        historial.append({"epoca": epoca, "perdida_entreno": error_entreno,
-                          "perdida_validacion": error_val,
-                          "accuracy_entreno": acierto_entreno,
-                          "accuracy_validacion": acierto_val})
-        # Conservamos el estado con MENOR pérdida de validación.
-        if error_val < mejor_perdida:
-            mejor_perdida = error_val
-            mejor_estado = copy.deepcopy(modelo.state_dict())
-            mejor_epoca = epoca
-
-    modelo.load_state_dict(mejor_estado)
-    modelo.eval()
     with torch.no_grad():
-        pred_val = modelo(x_val).argmax(1).numpy()
-        pred_entreno = modelo(x_entreno).argmax(1).numpy()
-    fila = {
-        "experimento": configuracion["nombre"], "semilla": semilla,
-        "capas": "-".join(str(n) for n in configuracion["capas"]),
-        "batch": configuracion["batch"], "lr": configuracion["lr"],
-        "mejor_epoca": mejor_epoca,
-        "accuracy_entreno": accuracy_score(y_entreno.numpy(), pred_entreno),
-        "accuracy_validacion": accuracy_score(y_val.numpy(), pred_val),
-        "f1_validacion": f1_score(y_val.numpy(), pred_val, average="macro", zero_division=0),
-        "perdida_validacion": mejor_perdida,
-        "segundos": time.perf_counter() - inicio,
-        "parametros": sum(p.numel() for p in modelo.parameters()),
-    }
-    return modelo, fila, pd.DataFrame(historial)
+        for batch_X, batch_y in loader:
+            outputs = model(batch_X)
+            loss = criterio(outputs, batch_y)
+            predichas = outputs.argmax(dim=1)
+
+            loss_total += loss.item() * len(batch_y)
+            aciertos += (predichas == batch_y).sum().item()
+            total += len(batch_y)
+
+    return loss_total / total, aciertos / total
 
 
-def ejecutar():
-    marcar_entrenamiento_pendiente()
-    resultados = CARPETA / "resultados"
-    modelos = resultados / "modelos"
-    modelos.mkdir(exist_ok=True)
-    torch.set_num_threads(1)
-    torch.use_deterministic_algorithms(True)
-    entradas, objetivos, partes, variables = preparar_datos()
-    x_entreno, x_val, x_prueba = [torch.tensor(x) for x in entradas]
-    y_entreno, y_val, y_prueba = [torch.tensor(y) for y in objetivos]
-    from preparacion_datos_entrenamiento import ejecutar_baseline
-    ejecutar_baseline(entradas, objetivos)
-    filas = []
+# ==============================================================================
+# 3. BUCLE DE EXPERIMENTACIÓN SISTEMÁTICA
+# ==============================================================================
+def ejecutar_experimentos(X_train, y_train, X_val, y_val, grid_experimentos, epochs=15):
+    # Asegurar que los datos sean Tensors de PyTorch con el tipo correcto
+    if not isinstance(X_train, torch.Tensor):
+        X_train = torch.tensor(np.array(X_train), dtype=torch.float32)
+    if not isinstance(y_train, torch.Tensor):
+        y_train = torch.tensor(np.array(y_train), dtype=torch.long)
+    if not isinstance(X_val, torch.Tensor):
+        X_val = torch.tensor(np.array(X_val), dtype=torch.float32)
+    if not isinstance(y_val, torch.Tensor):
+        y_val = torch.tensor(np.array(y_val), dtype=torch.long)
 
-    # La partición es siempre la misma. Cambian la inicialización y el barajado.
-    for config in EXPERIMENTOS:
+    input_dim = X_train.shape[1]
+    output_dim = len(torch.unique(y_train))
+
+    resultados = []
+    historicos = {}
+
+    for i, config in enumerate(grid_experimentos):
+        nombre_exp = f"Exp_{i+1}"
+        print(f"\n[{nombre_exp}/{len(grid_experimentos)}] Probando: {config}")
+
         for semilla in SEMILLAS:
-            modelo, fila, historial = entrenar(config, semilla, x_entreno, y_entreno, x_val, y_val)
-            filas.append(fila)
-            historial.to_csv(resultados / f"historial_{config['nombre']}_{semilla}.csv", index=False)
-            torch.save(modelo.state_dict(), modelos / f"{config['nombre']}_{semilla}.pt")
-            print(f"{config['nombre']} · semilla {semilla} · "
-                  f"F1 validación {fila['f1_validacion']:.3f} · época {fila['mejor_epoca']}", flush=True)
+            print(f"Semilla: {semilla}")
+            train_loader, val_loader = crear_dataloaders(
+                X_train, y_train, X_val, y_val, config['batch_size']
+            )
 
-    detalle = pd.DataFrame(filas)
-    detalle.to_csv(resultados / "experimentos_detalle.csv", index=False)
-    comparacion = detalle.groupby(["experimento", "capas", "batch", "lr", "parametros"],
-                                  as_index=False).agg(
-        accuracy_entreno=("accuracy_entreno", "mean"),
-        accuracy_validacion=("accuracy_validacion", "mean"),
-        f1_validacion=("f1_validacion", "mean"),
-        f1_desviacion=("f1_validacion", "std"),
-        segundos=("segundos", "mean"),
+            torch.manual_seed(semilla)
+            np.random.seed(semilla)
+            model = PeliculasNeuralNetwork(
+                input_dim=input_dim,
+                hidden_layers=config['hidden_layers'],
+                output_dim=output_dim
+            )
+            criterio = nn.CrossEntropyLoss()
+            optimizador = optim.Adam(model.parameters(), lr=config['learning_rate'])
+
+            hist_train_loss, hist_val_loss, hist_val_acc = [], [], []
+            start_time = time.time()
+
+            for epoch in range(epochs):
+                model.train()
+                loss_acum = 0.0
+                for batch_X, batch_y in train_loader:
+                    outputs = model(batch_X)
+                    loss = criterio(outputs, batch_y)
+
+                    optimizador.zero_grad()
+                    loss.backward()
+                    optimizador.step()
+
+                    loss_acum += loss.item() * len(batch_y)
+
+                loss_train = loss_acum / len(train_loader.dataset)
+                loss_val, acc_val = evaluar(model, val_loader, criterio)
+
+                hist_train_loss.append(loss_train)
+                hist_val_loss.append(loss_val)
+                hist_val_acc.append(acc_val)
+
+            tiempo_total = time.time() - start_time
+
+            resultados.append({
+                "ID": nombre_exp,
+                "Semilla": semilla,
+                "Capas Ocultas": str(config['hidden_layers']),
+                "Nº Capas": len(config['hidden_layers']),
+                "Batch Size": config['batch_size'],
+                "Learning Rate": config['learning_rate'],
+                "Train Loss Final": hist_train_loss[-1],
+                "Val Loss Final": hist_val_loss[-1],
+                "Val Accuracy (%)": hist_val_acc[-1] * 100,
+                "Tiempo (s)": tiempo_total
+            })
+
+            historicos[f"{nombre_exp}_{semilla}"] = {
+                "train_loss": hist_train_loss,
+                "val_loss": hist_val_loss,
+                "val_acc": hist_val_acc,
+                "config": config
+            }
+
+            torch.save(model.state_dict(), RESULTADOS / 'modelos' / f'{nombre_exp}_{semilla}.pt')
+            pd.DataFrame({'Época': range(1, epochs + 1), 'Loss Train': hist_train_loss,
+                          'Loss Val': hist_val_loss, 'Accuracy Val (%)': np.array(hist_val_acc) * 100}).to_csv(
+                              RESULTADOS / f'historial_{nombre_exp}_{semilla}.csv', index=False)
+
+    df_detalle = pd.DataFrame(resultados)
+    df_detalle.to_csv(RESULTADOS / 'experimentos_detalle.csv', index=False)
+    columnas_grupo = ['ID', 'Capas Ocultas', 'Nº Capas', 'Batch Size', 'Learning Rate']
+    columnas_media = ['Train Loss Final', 'Val Loss Final', 'Val Accuracy (%)', 'Tiempo (s)']
+    df_resultados = df_detalle.groupby(columnas_grupo, as_index=False)[columnas_media].mean()
+    desviaciones = df_detalle.groupby('ID')['Val Accuracy (%)'].std().rename('Desviación accuracy')
+    df_resultados = df_resultados.merge(desviaciones, on='ID')
+    df_resultados = df_resultados.sort_values(['Val Accuracy (%)', 'Val Loss Final'], ascending=[False, True])
+    df_resultados.to_csv(RESULTADOS / 'comparacion.csv', index=False)
+    (RESULTADOS / 'historicos.json').write_text(json.dumps(historicos), encoding='utf-8')
+    return df_resultados, historicos
+
+
+# ==============================================================================
+# 4. EJECUCIÓN DEL GRID
+# ==============================================================================
+if __name__ == "__main__":
+    grid = [
+
+        {"hidden_layers": [32], "batch_size": 32, "learning_rate": 0.01},
+        {"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.01},
+        {"hidden_layers": [128, 64, 32], "batch_size": 32, "learning_rate": 0.01},
+        {"hidden_layers": [64, 32], "batch_size": 16, "learning_rate": 0.01},
+        {"hidden_layers": [64, 32], "batch_size": 64, "learning_rate": 0.01},
+        {"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.001},
+        {"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.0001},
+
+        ]
+    #2 modelo de pruebas.Excede umbrales
+    #grid = [
+    # 1. Variación de Arquitectura (Base: batch=32, lr=0.01)
+    #{"hidden_layers": [32], "batch_size": 32, "learning_rate": 0.01},
+    #{"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.01},
+    #{"hidden_layers": [128, 64, 32], "batch_size": 32, "learning_rate": 0.01},
+    #{"hidden_layers": [256, 128, 64, 32], "batch_size": 32, "learning_rate": 0.01},  # Red compleja (4 capas)
+
+    # 2. Variación de Tamaño de Lote (Base: [64, 32], lr=0.01)
+    #{"hidden_layers": [64, 32], "batch_size": 16, "learning_rate": 0.01},
+    #{"hidden_layers": [64, 32], "batch_size": 64, "learning_rate": 0.01},
+
+    # 3. Variación de Tasa de Aprendizaje (Base: [64, 32], batch=32)
+    #{"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.001},
+    #{"hidden_layers": [64, 32], "batch_size": 32, "learning_rate": 0.0001},
+
+    # 4. Combinaciones Cruzadas Interesantes
+    #{"hidden_layers": [128, 64, 32], "batch_size": 32, "learning_rate": 0.0001},
+    #{"hidden_layers": [256, 128, 64, 32], "batch_size": 32, "learning_rate": 0.001},
+    #]
+
+
+
+    df_res, historico_exp = ejecutar_experimentos(
+        X_train, y_train, X_val, y_val, grid_experimentos=grid, epochs=15
     )
-    # Criterio declarado: mayor F1 macro medio de VALIDACIÓN.
-    comparacion = comparacion.sort_values(["f1_validacion", "f1_desviacion"],
-                                         ascending=[False, True]).reset_index(drop=True)
-    comparacion.to_csv(resultados / "comparacion.csv", index=False)
-    ganador = comparacion.iloc[0]["experimento"]
-    config_ganadora = next(c for c in EXPERIMENTOS if c["nombre"] == ganador)
 
-    # Solo ahora se utiliza prueba, para la configuración ya elegida.
+    print("\n=== RESULTADOS DEL GRID SEARCH ===")
+    print(df_res.to_string(index=False))
+    # La selección utiliza solo la accuracy media de validación.
+    ganador = df_res.iloc[0]['ID']
+    config = grid[int(ganador.split('_')[1]) - 1]
+    clases = [str(c) for c in label_encoder.classes_]
     pruebas = []
     for semilla in SEMILLAS:
-        modelo = construir_red(len(variables), config_ganadora["capas"])
-        modelo.load_state_dict(torch.load(modelos / f"{ganador}_{semilla}.pt", weights_only=True))
+        modelo = PeliculasNeuralNetwork(5, config['hidden_layers'], len(clases))
+        modelo.load_state_dict(torch.load(RESULTADOS / 'modelos' / f'{ganador}_{semilla}.pt', weights_only=True))
         modelo.eval()
         with torch.no_grad():
-            predicciones = modelo(x_prueba).argmax(1).numpy()
-        pruebas.append({"semilla": semilla,
-                        "accuracy": accuracy_score(objetivos[2], predicciones),
-                        "f1_macro": f1_score(objetivos[2], predicciones, average="macro", zero_division=0)})
+            predichas = modelo(torch.tensor(X_test, dtype=torch.float32)).argmax(1).numpy()
+        pruebas.append({'Semilla': semilla, 'Accuracy': accuracy_score(y_test, predichas),
+                        'F1 macro': f1_score(y_test, predichas, average='macro', zero_division=0)})
         if semilla == 42:
-            pred_principal = predicciones
-            # Se fija 42 de antemano; no se elige la semilla por su nota en prueba.
-            torch.save(modelo.state_dict(), resultados / "mejor_modelo.pt")
+            pred_principal = predichas
+            torch.save(modelo.state_dict(), RESULTADOS / 'mejor_modelo.pt')
+    pd.DataFrame(pruebas).to_csv(RESULTADOS / 'prueba_semillas.csv', index=False)
+    matriz = confusion_matrix(y_test, pred_principal, labels=range(len(clases)))
+    pd.DataFrame(matriz, index=clases, columns=clases).to_csv(RESULTADOS / 'matriz_confusion.csv')
+    reporte = classification_report(y_test, pred_principal, labels=range(len(clases)),
+                                    target_names=clases, output_dict=True, zero_division=0)
+    pd.DataFrame(reporte).T.to_csv(RESULTADOS / 'metricas_prueba.csv')
+    peliculas = df.iloc[idx_test][['id', 'original_title', 'popularity_level']].copy()
+    peliculas['Predicción'] = label_encoder.inverse_transform(pred_principal)
+    peliculas['Acierto'] = y_test == pred_principal
+    peliculas.to_csv(RESULTADOS / 'predicciones_prueba.csv', index=False)
 
-    tabla_prueba = pd.DataFrame(pruebas)
-    tabla_prueba.to_csv(resultados / "prueba_semillas.csv", index=False)
-    matriz = confusion_matrix(objetivos[2], pred_principal, labels=range(4))
-    pd.DataFrame(matriz, index=NOMBRES, columns=NOMBRES).to_csv(resultados / "matriz_confusion.csv")
-    informe = classification_report(objetivos[2], pred_principal, labels=range(4),
-                                    target_names=NOMBRES, output_dict=True, zero_division=0)
-    pd.DataFrame(informe).T.to_csv(resultados / "metricas_clases.csv")
-    peliculas_prueba = partes[2][["id", "original_title", "popularity_level"]].copy()
-    peliculas_prueba["prediccion"] = [CATEGORIAS[i] for i in pred_principal]
-    peliculas_prueba["acierto"] = objetivos[2] == pred_principal
-    peliculas_prueba.to_csv(resultados / "predicciones_prueba.csv", index=False)
-
-    # Referencias sencillas: misma información de entrada y mismos conjuntos.
-    mayoritaria = int(np.bincount(objetivos[0]).argmax())
+    # Referencias simples con los mismos conjuntos y las mismas cinco variables.
     logistica = LogisticRegression(max_iter=2000, random_state=42)
-    logistica.fit(entradas[0], objetivos[0])
-    referencias = []
-    for nombre in ["Clase mayoritaria", "Regresión logística"]:
-        if nombre == "Clase mayoritaria":
-            pv = np.full(len(objetivos[1]), mayoritaria)
-            pp = np.full(len(objetivos[2]), mayoritaria)
-        else:
-            pv = logistica.predict(entradas[1])
-            pp = logistica.predict(entradas[2])
-        referencias.append({"modelo": nombre,
-                            "accuracy_validacion": accuracy_score(objetivos[1], pv),
-                            "f1_validacion": f1_score(objetivos[1], pv, average="macro", zero_division=0),
-                            "accuracy_prueba": accuracy_score(objetivos[2], pp),
-                            "f1_prueba": f1_score(objetivos[2], pp, average="macro", zero_division=0)})
-    pd.DataFrame(referencias).to_csv(resultados / "referencias.csv", index=False)
-    resumen = {
-        "experimento_elegido": ganador, "configuracion": config_ganadora,
-        "numero_experimentos": len(EXPERIMENTOS), "epocas_maximas": EPOCAS, "semillas": SEMILLAS, "semilla_principal": 42,
-        "criterio": "Mayor F1 macro medio en validación; desempate por menor desviación",
-        "entradas": variables, "categorias": CATEGORIAS,
-        "filas": {n: len(p) for n, p in zip(["entrenamiento", "validacion", "prueba"], partes)},
-        "accuracy_prueba_media": float(tabla_prueba["accuracy"].mean()),
-        "f1_prueba_media": float(tabla_prueba["f1_macro"].mean()),
-        "f1_prueba_desviacion": float(tabla_prueba["f1_macro"].std()),
-        "accuracy_prueba_principal": pruebas[0]["accuracy"],
-        "f1_prueba_principal": pruebas[0]["f1_macro"],
-        "versiones": {"python": platform.python_version(), "torch": torch.__version__,
-                      "numpy": np.__version__, "pandas": pd.__version__},
-    }
-    (resultados / "resumen_modelo.json").write_text(json.dumps(resumen, indent=2, ensure_ascii=False),
-                                                  encoding="utf-8")
-    from generar_informe import generar_resultados
-    generar_resultados()
-    print(f"\nElegido por validación: {ganador}")
-    print(f"F1 macro en prueba (media de 3 semillas): {resumen['f1_prueba_media']:.3f}")
-
-
-if __name__ == "__main__":
-    ejecutar()
+    logistica.fit(X_train, y_train)
+    clase_mayoritaria = np.bincount(y_train).argmax()
+    referencias = pd.DataFrame([
+        {'Modelo': 'Clase mayoritaria', 'Accuracy prueba (%)': 100 * accuracy_score(y_test, np.full(len(y_test), clase_mayoritaria))},
+        {'Modelo': 'Regresión logística', 'Accuracy prueba (%)': 100 * accuracy_score(y_test, logistica.predict(X_test))},
+        {'Modelo': 'Red neuronal', 'Accuracy prueba (%)': 100 * np.mean([p['Accuracy'] for p in pruebas])}
+    ])
+    referencias.to_csv(RESULTADOS / 'referencias.csv', index=False)
+    resumen = {'base': '0857c4b', 'experimento_elegido': ganador, 'configuracion': config,
+               'configuraciones': len(grid), 'semillas': SEMILLAS, 'epocas': 15,
+               'entrenamiento': len(y_train), 'validacion': len(y_val), 'prueba': len(y_test),
+               'clases': clases, 'accuracy_prueba_media': float(np.mean([p['Accuracy'] for p in pruebas])),
+               'f1_prueba_medio': float(np.mean([p['F1 macro'] for p in pruebas])),
+               'accuracy_validacion_media': float(df_res.iloc[0]['Val Accuracy (%)']) / 100}
+    (RESULTADOS / 'resumen_modelo.json').write_text(json.dumps(resumen, indent=2, ensure_ascii=False), encoding='utf-8')
+    print('Configuración elegida por validación:', ganador)
+    print(referencias.to_string(index=False))

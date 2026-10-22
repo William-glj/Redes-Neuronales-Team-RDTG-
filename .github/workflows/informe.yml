@@ -38,7 +38,9 @@ jobs:
         working-directory: redes neuronales
         run: |
           python EDA.py
+          python preparacion_datos_entrenamiento.py
           python preparacion_hiperparametros_modulares.py
+          python generar_informe.py
           quarto render
       - name: Guardar resultados descargables
         uses: actions/upload-artifact@v4
@@ -47,7 +49,7 @@ jobs:
           path: |
             redes neuronales/resultados/
             redes neuronales/graficos/
-            redes neuronales/datos/peliculas_limpias.csv
+            redes neuronales/IMBD_Movie_Dataset_limpio.csv
           if-no-files-found: error
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

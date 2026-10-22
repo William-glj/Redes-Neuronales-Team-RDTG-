@@ -1,0 +1,45 @@
+La configuración ya elegida obtiene **67.53 % de accuracy medio en prueba**
+y **F1 macro 0.673**, promediando las tres semillas.
+Accuracy es aciertos divididos entre películas. F1 macro combina precisión y recall y promedia las cuatro clases con igual peso.
+
+| Semilla | Accuracy | F1 macro |
+| --- | --- | --- |
+| 42 | 0.6719 | 0.67 |
+| 7 | 0.6771 | 0.6775 |
+| 21 | 0.6771 | 0.6722 |
+
+La matriz usa la semilla 42, fijada de antemano: **129 aciertos de 192 películas**.
+Las filas son las categorías reales y las columnas las predichas; la diagonal representa aciertos.
+
+![Matriz de confusión de prueba, semilla 42.](graficos/matriz_confusion.png)
+
+| Clase | precision | recall | f1-score | support |
+| --- | --- | --- | --- | --- |
+| High | 0.83 | 0.796 | 0.812 | 49.0 |
+| Low | 0.75 | 0.766 | 0.758 | 47.0 |
+| Medium | 0.537 | 0.458 | 0.494 | 48.0 |
+| Moderately High | 0.571 | 0.667 | 0.615 | 48.0 |
+| macro avg | 0.672 | 0.672 | 0.67 | 192.0 |
+| weighted avg | 0.672 | 0.672 | 0.67 | 192.0 |
+
+#### Comparación con referencias sencillas
+
+| Modelo | Accuracy prueba (%) |
+| --- | --- |
+| Clase mayoritaria | 25.52 |
+| Regresión logística | 63.54 |
+| Red neuronal | 67.53 |
+
+La diferencia de la red frente a la logística es de **3.99 puntos porcentuales** en esta ejecución.
+Se utilizan las mismas cinco entradas y la misma prueba. No demuestra superioridad general ni significación estadística.
+
+#### Ejemplos reales
+
+| original_title | popularity_level | Predicción | Acierto |
+| --- | --- | --- | --- |
+| Let Me In | Medium | Medium | True |
+| Blade: Trinity | Moderately High | Moderately High | True |
+| The Words | Low | Medium | False |
+| About a Boy | Moderately High | Medium | False |
+
+Son dos aciertos y dos errores, escogidos para explicar el resultado. El modelo no recibe los títulos y estos ejemplos no se usan para elegirlo.

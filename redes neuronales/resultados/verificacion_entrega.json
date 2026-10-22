@@ -1,22 +1,28 @@
 {
   "estado": "correcto",
+  "base": "0857c4b",
+  "csv_original_intacto": true,
+  "clases_y_funciones_originales_identicas": [
+    "preparacion_hiperparametros_modulares.py:PeliculasNeuralNetwork",
+    "preparacion_hiperparametros_modulares.py:crear_dataloaders",
+    "preparacion_hiperparametros_modulares.py:evaluar",
+    "preparacion_datos_entrenamiento.py:PeliculasNeuralNetwork",
+    "preparacion_datos_entrenamiento.py:evaluar"
+  ],
+  "siete_configuraciones_originales_identicas": true,
   "filas_limpias": 1276,
   "particiones": [
     893,
     191,
     192
   ],
-  "modelos_con_metricas_de_validacion_reproducidas": 24,
-  "fechas_corregidas": 12,
-  "aciertos_semilla_42": 117,
-  "peliculas_prueba": 192,
-  "entradas_etiquetas_y_predicciones_sin_cambios": true,
-  "originales_intactos": true,
-  "accuracy_prueba_media": 0.609375,
-  "f1_prueba_media": 0.6026600276398034,
-  "experimento": "Exp_2",
-  "informe_quarto_generado": true,
+  "modelos_verificados": 21,
+  "predicciones_y_metricas_reproducidas": true,
+  "experimento_elegido": "Exp_1",
+  "accuracy_prueba_media": 0.6753472222222223,
+  "f1_prueba_medio": 0.6732657639647012,
+  "aciertos_principal": 129,
   "figuras_incrustadas": 10,
-  "recursos_externos_necesarios": [],
-  "anclas_internas_validas": true
+  "recursos_externos": [],
+  "anclas_validas": true
 }

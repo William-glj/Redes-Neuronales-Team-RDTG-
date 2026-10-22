@@ -1,193 +1,193 @@
-id,original_title,popularity_level,prediccion,acierto
-82682,Gangster Squad,Moderately High,High,False
-809,Shrek 2,High,High,True
-226,Boys Don't Cry,Moderately High,Low,False
-10992,Cats & Dogs,Medium,Low,False
-9806,The Incredibles,High,High,True
-707,A View to a Kill,Moderately High,Moderately High,True
-49950,The Roommate,Medium,Low,False
-658,Goldfinger,High,High,True
-1865,Pirates of the Caribbean: On Stranger Tides,High,High,True
-615,The Passion of the Christ,Medium,Medium,True
-27578,The Expendables,High,High,True
-20764,Sleep Dealer,Low,Low,True
-59967,Looper,Moderately High,High,False
-564,The Mummy,High,High,True
-318846,The Big Short,High,High,True
-109424,Captain Phillips,Moderately High,High,False
-320588,"Hello, My Name Is Doris",Medium,Low,False
-136400,2 Guns,High,High,True
-77930,Magic Mike,Moderately High,Moderately High,True
-46528,The Warrior's Way,Low,Low,True
-135397,Jurassic World,High,High,True
-3877,Things We Lost in the Fire,Low,Low,True
-25643,Love Happens,Medium,Low,False
-1930,The Amazing Spider-Man,High,High,True
-9767,The Break-Up,Moderately High,Moderately High,True
-10909,Kalifornia,Medium,Low,False
-13067,In the Land of Women,Low,Low,True
-4566,Michael Clayton,Low,Medium,False
-333348,Love the Coopers,Moderately High,Low,False
-64685,Extremely Loud & Incredibly Close,Medium,Medium,True
-2787,Pitch Black,Medium,High,False
-109414,This Is the End,Moderately High,High,False
-10057,The Three Musketeers,Medium,Low,False
-77,Memento,High,High,True
-67913,The Guard,Medium,Low,False
-3563,I Now Pronounce You Chuck & Larry,Medium,Moderately High,False
-14435,My Bloody Valentine,Medium,Low,False
-177572,Big Hero 6,High,High,True
-55846,Blitz,Medium,Medium,True
-88794,J. Edgar,Low,Medium,False
-44564,The Dilemma,Medium,Medium,True
-257344,Pixels,High,High,True
-100,"Lock, Stock and Two Smoking Barrels",Medium,Moderately High,False
-3586,PrÃªt-Ã -Porter,Low,Low,True
-98566,Teenage Mutant Ninja Turtles,High,High,True
-16564,Oorlogswinter,Low,Low,True
-9884,Collateral Damage,Moderately High,Moderately High,True
-8285,The Spirit,Low,Medium,False
-285783,The Walk,Moderately High,High,False
-9989,AntiTrust,Medium,Low,False
-955,Mission: Impossible II,Moderately High,High,False
-152601,Her,High,High,True
-137113,Edge of Tomorrow,High,High,True
-8456,Never Back Down,Moderately High,Medium,False
-68817,Footloose,Medium,Medium,True
-72197,The Pirates! In an Adventure with Scientists!,Medium,Medium,True
-205596,The Imitation Game,High,High,True
-253,Live and Let Die,Moderately High,Moderately High,True
-58233,Johnny English Reborn,Medium,Moderately High,False
-82633,Lawless,Moderately High,Moderately High,True
-58428,The Innkeepers,Low,Low,True
-78,Blade Runner,High,High,True
-2662,House of 1000 Corpses,Low,Low,True
-182,The Good German,Low,Low,True
-36643,The World Is Not Enough,High,Moderately High,False
-41233,Step Up 3D,Moderately High,Medium,False
-258480,Carol,High,Moderately High,False
-8618,The History Boys,Low,Low,True
-8968,Boogeyman,Low,Low,True
-55725,Win Win,Low,Low,True
-561,Constantine,High,Moderately High,False
-76163,The Expendables 2,High,High,True
-75900,My Week with Marilyn,Medium,Medium,True
-237,Young Adam,Low,Low,True
-1717,All the King's Men,Medium,Low,False
-314365,Spotlight,High,High,True
-7459,Speed Racer,Medium,Low,False
-83770,On the Road,Low,Low,True
-22,Pirates of the Caribbean: The Curse of the Black Pearl,High,High,True
-8374,The Boondock Saints,Medium,Moderately High,False
-65086,The Woman in Black,Medium,Moderately High,False
-807,Se7en,High,High,True
-9739,Demolition Man,Moderately High,Moderately High,True
-435,The Day After Tomorrow,Moderately High,High,False
-69668,Dream House,Low,Medium,False
-127585,X-Men: Days of Future Past,High,High,True
-1213,The Talented Mr. Ripley,Low,Medium,False
-201088,Blackhat,High,High,True
-55465,A Very Harold & Kumar Christmas,Medium,Medium,True
-22825,The Box,Moderately High,Medium,False
-168259,Furious 7,High,High,True
-62206,30 Minutes or Less,Low,Medium,False
-35,The Simpsons Movie,Moderately High,Moderately High,True
-19585,G-Force,Moderately High,Medium,False
-10665,The Strangers,Medium,Low,False
-43959,Soul Surfer,Low,Medium,False
-6639,Love in the Time of Cholera,Low,Low,True
-1024,Heavenly Creatures,Medium,Low,False
-44943,Battle: Los Angeles,Moderately High,Moderately High,True
-17047,Agent Cody Banks 2: Destination London,Low,Low,True
-15158,Phantasm II,Low,Low,True
-54518,Justin Bieber: Never Say Never,Low,Low,True
-43923,It's Kind of a Funny Story,Medium,Medium,True
-44264,True Grit,Moderately High,Moderately High,True
-7304,Running Scared,Low,Medium,False
-240832,Lucy,High,High,True
-20856,Aliens in the Attic,Low,Medium,False
-239563,St. Vincent,Moderately High,Moderately High,True
-243683,Step Up All In,High,Moderately High,False
-2048,"I, Robot",High,High,True
-810,Shrek the Third,Moderately High,High,False
-49013,Cars 2,High,Moderately High,False
-1832,Dogma,Medium,Moderately High,False
+id,original_title,popularity_level,Predicción,Acierto
+41402,Let Me In,Medium,Medium,True
+36648,Blade: Trinity,Moderately High,Moderately High,True
 1430,Bowling for Columbine,Medium,Medium,True
-11928,Tetro,Low,Low,True
-1125,Dreamgirls,Low,Low,True
-49849,Cowboys & Aliens,Moderately High,Moderately High,True
-280092,Insidious: Chapter 3,Moderately High,Moderately High,True
-9757,Norbit,Low,Medium,False
-10193,Toy Story 3,High,High,True
-284536,The Gambler,Low,Moderately High,False
-1584,The School of Rock,Moderately High,Moderately High,True
-1961,My Name Is Bruce,Low,Low,True
-85,Raiders of the Lost Ark,High,High,True
-58699,Bellflower,Low,Low,True
-14191,Aquamarine,Low,Medium,False
-3580,Changeling,Medium,Medium,True
-14,American Beauty,High,High,True
-19898,Pandorum,Moderately High,Medium,False
-38357,Morning Glory,Medium,Medium,True
-1988,A Mighty Heart,Low,Low,True
-2255,Chasing Amy,Moderately High,Low,False
-8271,Disturbia,Moderately High,Medium,False
-323272,War Room,Medium,Low,False
-60308,Moneyball,Medium,Moderately High,False
-709,Licence to Kill,High,Moderately High,False
-11247,A Cinderella Story,Moderately High,Medium,False
-294254,Maze Runner: The Scorch Trials,High,High,True
-451,Leaving Las Vegas,Moderately High,Low,False
-10982,Hoodwinked!,Medium,Medium,True
-13600,City of Ember,Medium,Medium,True
-18360,Night at the Museum: Battle of the Smithsonian,Moderately High,Moderately High,True
-24684,An Education,Low,Medium,False
-1443,The Virgin Suicides,Medium,Medium,True
-39691,Cats & Dogs 2 : The Revenge of Kitty Galore,Low,Low,True
-16996,17 Again,Moderately High,Moderately High,True
-8046,Gigli,Low,Low,True
-64328,The Muppets,Medium,Medium,True
-58595,Snow White and the Huntsman,High,High,True
-39781,The Kids Are All Right,Medium,Medium,True
-663,Saw IV,Medium,Medium,True
-2062,Ratatouille,High,High,True
-10153,Sphere,Moderately High,Moderately High,True
-348,Alien,High,High,True
-116741,The Internship,Low,Moderately High,False
-79777,In the Land of Blood and Honey,Low,Low,True
-920,Cars,High,High,True
-20178,World's Greatest Dad,Low,Low,True
-328425,The Gift,Moderately High,Moderately High,True
-38055,Megamind,Moderately High,Moderately High,True
-1677,Ray,Low,Low,True
-10195,Thor,High,High,True
-18320,The Young Victoria,Medium,Medium,True
-504,Monster,Low,Medium,False
-7220,The Punisher,Medium,Moderately High,False
-293863,The Age of Adaline,High,High,True
-13335,Harold & Kumar Escape from Guantanamo Bay,Medium,Medium,True
-28,Apocalypse Now,High,High,True
-227719,Project Almanac,Moderately High,Moderately High,True
-345,Eyes Wide Shut,Moderately High,Moderately High,True
-10679,Iron Sky,Moderately High,Medium,False
-671,Harry Potter and the Philosopher's Stone,High,High,True
-24150,Halloween II,Low,Low,True
-49009,The Way Back,Moderately High,Medium,False
-1977,The Grudge 3,Low,Low,True
-13809,RockNRolla,Medium,Medium,True
-147441,Exodus: Gods and Kings,High,High,True
-217,Indiana Jones and the Kingdom of the Crystal Skull,High,High,True
-7737,Resident Evil: Extinction,Medium,Moderately High,False
-455,Bend It Like Beckham,Moderately High,Low,False
-1250,Ghost Rider,High,Moderately High,False
-16353,Ong Bak 2,Low,Low,True
-75674,Act of Valor,Moderately High,Medium,False
-14560,Paul Blart: Mall Cop,Moderately High,Medium,False
-9381,Babylon A.D.,Medium,Moderately High,False
-80585,Rock of Ages,Moderately High,Medium,False
-93456,Despicable Me 2,High,High,True
-18240,The Proposal,Moderately High,Moderately High,True
+2149,Body of Evidence,Low,Low,True
+660,Thunderball,Moderately High,Moderately High,True
+23047,Season of the Witch,Medium,Medium,True
+83686,The Words,Low,Medium,False
+245,About a Boy,Moderately High,Medium,False
+228165,The SpongeBob Movie: Sponge Out of Water,Moderately High,Moderately High,True
+114150,Pitch Perfect,High,High,True
+133805,Carrie,Moderately High,Moderately High,True
+245891,John Wick,High,High,True
+34813,The Losers,Medium,Medium,True
+9739,Demolition Man,Moderately High,Moderately High,True
+15512,Monsters vs Aliens,Moderately High,Moderately High,True
+328589,The Lady in the Van,Medium,Low,False
+62837,Dolphin Tale,Low,Low,True
+290751,Secret in Their Eyes,Moderately High,Medium,False
+924,Dawn of the Dead,Medium,Moderately High,False
+954,Mission: Impossible,High,High,True
+6477,Alvin and the Chipmunks,Moderately High,Moderately High,True
+5876,The Mist,High,Moderately High,False
+51588,Prom,Low,Low,True
+75,Mars Attacks!,Moderately High,Moderately High,True
+67913,The Guard,Medium,Low,False
+57089,Hoodwinked Too! Hood VS. Evil,Low,Low,True
+211672,Minions,High,High,True
+120,The Lord of the Rings: The Fellowship of the Ring,High,High,True
 773,Little Miss Sunshine,Medium,Moderately High,False
-14144,Daddy Day Camp,Medium,Low,False
-152760,The Monuments Men,Moderately High,High,False
-56401,The Music Never Stopped,Low,Low,True
+13150,Pride and Glory,Low,Low,True
+44040,Devil,Low,Medium,False
+10637,Remember the Titans,Medium,Moderately High,False
+12837,The Secret Life of Bees,Low,Low,True
+18360,Night at the Museum: Battle of the Smithsonian,Moderately High,Moderately High,True
+65055,Shark Night,Low,Low,True
+2016,IndigÃ¨nes,Low,Low,True
+79777,In the Land of Blood and Honey,Low,Low,True
+9487,A Bug's Life,Moderately High,High,False
+33909,Wall Street: Money Never Sleeps,Low,Medium,False
+12,Finding Nemo,High,High,True
+79694,The Apparition,Low,Low,True
+23629,Sucker Punch,Moderately High,Moderately High,True
+71679,Resident Evil: Retribution,Low,Moderately High,False
+105,Back to the Future,High,High,True
+321741,Concussion,Moderately High,Moderately High,True
+80274,Ender's Game,High,High,True
+45610,Machine Gun Preacher,Medium,Low,False
+227973,The Peanuts Movie,High,Moderately High,False
+19901,Daybreakers,Medium,Medium,True
+512,Scoop,Low,Low,True
+306745,Freeheld,Medium,Low,False
+755,From Dusk Till Dawn,Moderately High,Moderately High,True
+4513,30 Days of Night,Moderately High,Medium,False
+137321,Winter's Tale,Medium,Medium,True
+8968,Boogeyman,Low,Low,True
+13359,Expelled: No Intelligence Allowed,Low,Low,True
+38321,Priest,Moderately High,Medium,False
+38778,Dinner for Schmucks,Medium,Medium,True
+1977,The Grudge 3,Low,Low,True
+38356,Transformers: Dark of the Moon,Medium,High,False
+284276,Cake,High,Medium,False
+5137,Sky Captain and the World of Tomorrow,Moderately High,Medium,False
+10193,Toy Story 3,High,High,True
+205596,The Imitation Game,High,High,True
+3536,U-571,Moderately High,Medium,False
+10661,You Don't Mess With the Zohan,Medium,Moderately High,False
+27022,The Sorcerer's Apprentice,Moderately High,Moderately High,True
+106646,The Wolf of Wall Street,High,High,True
+11036,The Notebook,High,High,True
+4922,The Curious Case of Benjamin Button,High,High,True
+14574,The Boy in the Striped Pyjamas,Moderately High,Moderately High,True
+1381,The Fountain,Moderately High,Medium,False
+8270,The Lookout,Low,Low,True
+45612,Source Code,High,High,True
+20764,Sleep Dealer,Low,Low,True
+8469,Animal House,Moderately High,Moderately High,True
+18126,Hannah Montana: The Movie,Low,Medium,False
+161,Ocean's Eleven,High,High,True
+4964,Knocked Up,Moderately High,Moderately High,True
+4566,Michael Clayton,Low,Low,True
+84355,Your Sister's Sister,Low,Low,True
+36670,Never Say Never Again,Moderately High,Moderately High,True
+39781,The Kids Are All Right,Medium,Medium,True
+16523,Where the Wild Things Are,Medium,Medium,True
+93456,Despicable Me 2,High,High,True
+8619,Master and Commander: The Far Side of the World,Moderately High,Moderately High,True
+254128,San Andreas,High,High,True
+22794,Cloudy with a Chance of Meatballs,Moderately High,Moderately High,True
+14024,Raise Your Voice,Low,Low,True
+281,Strange Days,Low,Moderately High,False
+9693,Children of Men,Moderately High,Moderately High,True
+116149,Paddington,High,Moderately High,False
+18320,The Young Victoria,Medium,Low,False
+205,Hotel Rwanda,Medium,Medium,True
+243940,The Lazarus Effect,Low,Medium,False
+578,Jaws,High,High,True
+68718,Django Unchained,High,High,True
+10877,Exit Wounds,Low,Low,True
+45317,The Fighter,Medium,Moderately High,False
+534,Terminator Salvation,High,High,True
+99861,Avengers: Age of Ultron,High,High,True
+312221,Creed,High,High,True
+198184,Chappie,High,High,True
+22907,Takers,Medium,Medium,True
+50546,Just Go With It,High,Moderately High,False
+46195,Rio,Moderately High,High,False
+216015,Fifty Shades of Grey,High,High,True
+62214,Frankenweenie,Medium,Moderately High,False
+23168,The Town,Moderately High,Moderately High,True
+97367,The Place Beyond the Pines,Moderately High,High,False
+2252,Eastern Promises,Medium,Medium,True
+1844,Entrapment,Moderately High,Moderately High,True
+75622,Rampart,Low,Low,True
+8852,Prince of Darkness,Low,Low,True
+603,The Matrix,High,High,True
+38757,Tangled,High,High,True
+10521,Bride Wars,Medium,Medium,True
+11322,Public Enemies,Medium,Moderately High,False
+52520,Underworld: Awakening,High,Moderately High,False
+9982,Chicken Little,Moderately High,Moderately High,True
+152601,Her,High,High,True
+17134,12 Rounds,Medium,Low,False
+1991,Death Proof,High,Moderately High,False
+3131,Gangs of New York,Moderately High,Moderately High,True
+1422,The Departed,High,High,True
+238713,Spy,High,High,True
+4564,Sex and the City,Low,Low,True
+6557,27 Dresses,Moderately High,Moderately High,True
+41439,Saw 3D,Medium,Medium,True
+17927,Fired Up!,Low,Low,True
+85,Raiders of the Lost Ark,High,High,True
+50725,Take Me Home Tonight,Medium,Low,False
+16866,Planet 51,Medium,Medium,True
+11059,House of the Dead,Low,Low,True
+55725,Win Win,Low,Low,True
+62835,Colombiana,Moderately High,Moderately High,True
+77931,The Smurfs 2,Medium,Moderately High,False
+298382,The Dressmaker,Moderately High,Medium,False
+323272,War Room,Medium,Low,False
+72431,Red Tails,Low,Low,True
+19959,Surrogates,Low,Moderately High,False
+72113,Carnage,Medium,Medium,True
+675,Harry Potter and the Order of the Phoenix,High,High,True
+49494,The Eagle,Low,Medium,False
+5255,The Polar Express,High,High,True
+41210,The Switch,Medium,Medium,True
+10020,Beauty and the Beast,High,High,True
+8618,The History Boys,Low,Low,True
+46705,Blue Valentine,Moderately High,Medium,False
+4464,Seabiscuit,Low,Medium,False
+889,The Flintstones in Viva Rock Vegas,Low,Low,True
+435,The Day After Tomorrow,Moderately High,High,False
+39800,Life During Wartime,Medium,Low,False
+7191,Cloverfield,Moderately High,Moderately High,True
+50544,Friends with Benefits,High,Moderately High,False
+253412,Everest,High,High,True
+309809,The Little Prince,Moderately High,Moderately High,True
+238615,Self/less,High,Moderately High,False
+42188,Never Let Me Go,Medium,Medium,True
+65759,Happy Feet Two,Medium,Medium,True
+620,Ghostbusters,High,High,True
+18239,The Twilight Saga: New Moon,Moderately High,High,False
+1961,My Name Is Bruce,Low,Low,True
+1892,Return of the Jedi,High,High,True
+6973,In the Valley of Elah,Low,Low,True
+1495,Kingdom of Heaven,Moderately High,Moderately High,True
+43935,Dylan Dog: Dead of Night,Low,Low,True
+20766,The Road,Moderately High,Moderately High,True
+8374,The Boondock Saints,Medium,Moderately High,False
+22894,Legion,Medium,Medium,True
+86838,Seven Psychopaths,Medium,Moderately High,False
+10153,Sphere,Moderately High,Moderately High,True
+256591,Focus,High,High,True
+10358,Zack and Miri Make a Porno,Medium,Medium,True
+24428,The Avengers,High,High,True
+237,Young Adam,Low,Low,True
+810,Shrek the Third,Moderately High,High,False
+8271,Disturbia,Moderately High,Medium,False
+91070,L!fe Happens,Low,Low,True
+23367,Bandslam,Medium,Low,False
+227719,Project Almanac,Moderately High,Moderately High,True
+80278,Lo imposible,High,Moderately High,False
+503,Poseidon,Medium,Moderately High,False
+50780,The Beaver,Medium,Medium,True
+34016,She's Out of My League,Low,Medium,False
+71668,Piranha 3DD,Medium,Low,False
+1947,An Unfinished Life,Medium,Low,False
+60308,Moneyball,Medium,Moderately High,False
+24150,Halloween II,Low,Low,True
+3573,Emma,Low,Low,True
+1858,Transformers,Medium,High,False
+16869,Inglourious Basterds,High,High,True

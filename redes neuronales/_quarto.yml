@@ -4,15 +4,12 @@ project:
   render:
     - presentacion.qmd
 website:
-  title: "Cine y redes neuronales · RDTG"
+  title: "Redes Neuronales · Cine"
 format:
   html:
-    theme:
-      - cosmo
-      - estilos.scss
+    theme: cosmo
     lang: es
     toc: true
-    toc-depth: 2
-    number-sections: true
+    toc-depth: 3
     code-copy: true
     embed-resources: true

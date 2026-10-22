@@ -1,0 +1,18 @@
+La mejor configuración según el criterio fijado es **Exp_1**: capas ocultas
+**[32]**, lote **32** y tasa de aprendizaje
+**0.01**. Su accuracy media de validación es **61.78 %**.
+Se selecciona con validación; no se utiliza prueba para escogerla.
+
+1. **Tamaño del lote:** Exp_2, Exp_4 y Exp_5 mantienen la red [64, 32] y la tasa 0,01.
+   Sus accuracies medias son 60.73 %, 60.38 % y 61.26 %.
+   La comparación describe estos experimentos; no demuestra una causa universal del resultado.
+2. **Tasa de aprendizaje:** Exp_2, Exp_6 y Exp_7 usan la misma arquitectura y lote.
+   Con tasa 0,0001, Exp_7 obtiene 45.90 %.
+   Con quince épocas puede necesitar más entrenamiento; no significa que esa tasa nunca funcione.
+3. **Profundidad y neuronas:** las redes [32], [64, 32] y [128, 64, 32] cambian capas y anchura.
+   No aislamos el efecto de cada cambio. La red mayor consigue 59.51 %.
+   Más neuronas no garantizan más aciertos. Para estudiar sobreajuste miramos las curvas completas.
+
+La diferencia entre Exp_1 y Exp_5 es de **0.52 puntos**.
+La desviación de Exp_1 entre semillas es **1.39 puntos**.
+Tres repeticiones ayudan a ver variación, pero no demuestran significación estadística.
